@@ -1,0 +1,16 @@
+PODS:
+  - WRParsingBasic (0.1.0)
+
+DEPENDENCIES:
+  - WRParsingBasic (from `../../Parser/WRParsingComponent/WRParsingBasic`)
+
+EXTERNAL SOURCES:
+  WRParsingBasic:
+    :path: "../../Parser/WRParsingComponent/WRParsingBasic"
+
+SPEC CHECKSUMS:
+  WRParsingBasic: 57d07dab937f66faea1b878f010737977bf24390
+
+PODFILE CHECKSUM: f96473892dd97c42c3f94244c98525ee4c2aa78c
+
+COCOAPODS: 1.2.1

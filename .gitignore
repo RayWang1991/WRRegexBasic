@@ -1,0 +1,7 @@
+.idea/
+### Xcode Patch ###
+.xcodeproj/
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+

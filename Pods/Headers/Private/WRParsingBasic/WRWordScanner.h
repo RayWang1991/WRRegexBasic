@@ -1,0 +1,1 @@
+../../../../../../Parser/WRParsingComponent/WRParsingBasic/Classes/Scanner/WRWordScanner.h
