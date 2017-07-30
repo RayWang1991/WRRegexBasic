@@ -13,7 +13,7 @@
 @property (nonatomic, strong, readwrite) NSArray <WRRENFAState *> *NFAStates;
 
 - (instancetype)initWithNFAStateArray:(NSArray <WRRENFAState *> *)NFAStateArray;
-+ (NSArray <WRRENFAState *> *)NFAStateArrayWithSet:(NSSet <WRRENFAState *> *)NFAStateSet
++ (NSArray <WRRENFAState *> *)NFAStateArrayWithSet:(NSSet <WRRENFAState *> *)NFAStateSet;
 - (instancetype)initWithNFAStateSet:(NSSet <WRRENFAState *> *)NFAStateSet;
 
 - (void)trimWithStateId:(NSUInteger)stateId;

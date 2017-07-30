@@ -9,6 +9,6 @@
 @class WRRENFAState;
 @class WRRENFATransition;
 @class WRREDFAState;
-@interface WRREDFAutoma : NSObject
+@interface WRREAutoma : NSObject
 
 @end

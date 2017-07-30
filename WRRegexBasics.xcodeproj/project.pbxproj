@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		3AED25FC088328EA1C322E6E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2FA81FB2D7DAB070A83B /* main.m */; };
+		3AED265D119A44C049350B39 /* WRREDFAState.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED20AAB1B3C61011662011 /* WRREDFAState.m */; };
+		3AED270E9CE1B17171295A76 /* WRCharRange.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2A3F26B1B0C7C59CA56C /* WRCharRange.m */; };
+		3AED2A78AA0C99601F1D7383 /* WRRETransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2F627824EF16C4505BA6 /* WRRETransition.m */; };
+		3AED2CBA0CED415C11F65F8F /* WRNormalizeCharRangeSetAlgorithm.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2F9A0E715A7D72F53670 /* WRNormalizeCharRangeSetAlgorithm.m */; };
+		3AED2D97859C033E1AF71336 /* WRRENFAState.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2F1441ADE5EB60DFE028 /* WRRENFAState.m */; };
+		3AED2F28919494FCE103666C /* WRREAutoma.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2217C21A7B105B0D5A91 /* WRREAutoma.m */; };
 		4DFEBA3BDFB2AA0F75D58229 /* libPods-WRRegexBasics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D02CA13FB586BA4AE945C29C /* libPods-WRRegexBasics.a */; };
 /* End PBXBuildFile section */
 
@@ -25,7 +31,20 @@
 
 /* Begin PBXFileReference section */
 		357ABC2BE51C56B4AEFDBE4F /* Pods-WRRegexBasics.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WRRegexBasics.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WRRegexBasics/Pods-WRRegexBasics.debug.xcconfig"; sourceTree = "<group>"; };
+		3AED20AAB1B3C61011662011 /* WRREDFAState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRREDFAState.m; sourceTree = "<group>"; };
+		3AED2217C21A7B105B0D5A91 /* WRREAutoma.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRREAutoma.m; sourceTree = "<group>"; };
+		3AED226FD7C2206B2D4B9AB2 /* WRCharRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRCharRange.h; sourceTree = "<group>"; };
+		3AED27A0FDB35FA34ECCD99A /* WRRENFAState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRENFAState.h; sourceTree = "<group>"; };
+		3AED28CE1EAEAEDF417598A9 /* WRNormalizeCharRangeSetAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRNormalizeCharRangeSetAlgorithm.h; sourceTree = "<group>"; };
 		3AED2943E95FD155BE2D9E89 /* WRRegexBasics */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = WRRegexBasics; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AED2A3F26B1B0C7C59CA56C /* WRCharRange.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRCharRange.m; sourceTree = "<group>"; };
+		3AED2D6470E753773331EEA5 /* WRRegexLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRegexLib.h; sourceTree = "<group>"; };
+		3AED2E064CDD16F59181FBEF /* WRREAutoma.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRREAutoma.h; sourceTree = "<group>"; };
+		3AED2E959959EC3E9EA3A5B0 /* WRREDFAState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRREDFAState.h; sourceTree = "<group>"; };
+		3AED2F1441ADE5EB60DFE028 /* WRRENFAState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRENFAState.m; sourceTree = "<group>"; };
+		3AED2F627824EF16C4505BA6 /* WRRETransition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRETransition.m; sourceTree = "<group>"; };
+		3AED2F64023D74871E4D3F85 /* WRRETransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRETransition.h; sourceTree = "<group>"; };
+		3AED2F9A0E715A7D72F53670 /* WRNormalizeCharRangeSetAlgorithm.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRNormalizeCharRangeSetAlgorithm.m; sourceTree = "<group>"; };
 		3AED2FA81FB2D7DAB070A83B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A494416AE573867DD828B372 /* Pods-WRRegexBasics.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WRRegexBasics.release.xcconfig"; path = "Pods/Target Support Files/Pods-WRRegexBasics/Pods-WRRegexBasics.release.xcconfig"; sourceTree = "<group>"; };
 		D02CA13FB586BA4AE945C29C /* libPods-WRRegexBasics.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WRRegexBasics.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -65,8 +84,37 @@
 			isa = PBXGroup;
 			children = (
 				3AED2FA81FB2D7DAB070A83B /* main.m */,
+				3AED2F0EC3FCFA106C33EE06 /* Model */,
+				3AED2B62923E035988F41C21 /* Algorithm */,
+				3AED2D6470E753773331EEA5 /* WRRegexLib.h */,
 			);
 			path = WRRegexBasics;
+			sourceTree = "<group>";
+		};
+		3AED2B62923E035988F41C21 /* Algorithm */ = {
+			isa = PBXGroup;
+			children = (
+				3AED2F9A0E715A7D72F53670 /* WRNormalizeCharRangeSetAlgorithm.m */,
+				3AED28CE1EAEAEDF417598A9 /* WRNormalizeCharRangeSetAlgorithm.h */,
+			);
+			path = Algorithm;
+			sourceTree = "<group>";
+		};
+		3AED2F0EC3FCFA106C33EE06 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				3AED2F1441ADE5EB60DFE028 /* WRRENFAState.m */,
+				3AED27A0FDB35FA34ECCD99A /* WRRENFAState.h */,
+				3AED20AAB1B3C61011662011 /* WRREDFAState.m */,
+				3AED2E959959EC3E9EA3A5B0 /* WRREDFAState.h */,
+				3AED2217C21A7B105B0D5A91 /* WRREAutoma.m */,
+				3AED2E064CDD16F59181FBEF /* WRREAutoma.h */,
+				3AED2F627824EF16C4505BA6 /* WRRETransition.m */,
+				3AED2F64023D74871E4D3F85 /* WRRETransition.h */,
+				3AED2A3F26B1B0C7C59CA56C /* WRCharRange.m */,
+				3AED226FD7C2206B2D4B9AB2 /* WRCharRange.h */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 		9202E0F376F344E5F0CCA39C /* Frameworks */ = {
@@ -172,6 +220,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				3AED25FC088328EA1C322E6E /* main.m in Sources */,
+				3AED2D97859C033E1AF71336 /* WRRENFAState.m in Sources */,
+				3AED265D119A44C049350B39 /* WRREDFAState.m in Sources */,
+				3AED2F28919494FCE103666C /* WRREAutoma.m in Sources */,
+				3AED2A78AA0C99601F1D7383 /* WRRETransition.m in Sources */,
+				3AED270E9CE1B17171295A76 /* WRCharRange.m in Sources */,
+				3AED2CBA0CED415C11F65F8F /* WRNormalizeCharRangeSetAlgorithm.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

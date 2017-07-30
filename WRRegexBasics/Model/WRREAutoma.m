@@ -4,9 +4,9 @@
  * Author: wangrui@bongmi.com
  */
 
-#import "WRREDFAutoma.h"
+#import "WRREAutoma.h"
 
-@implementation WRREDFAutoma {
+@implementation WRREAutoma {
 
 }
 @end
