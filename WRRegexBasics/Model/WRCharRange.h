@@ -6,4 +6,10 @@
 
 #import <Foundation/Foundation.h>
 
-@interface WRCharRange : NSObject @end
+@interface WRCharRange : NSObject
+@property (nonatomic, assign, readwrite) unsigned char start;
+@property (nonatomic, assign, readwrite) unsigned char end;
+- (instancetype)initWithStart:(unsigned char)start
+                       andEnd:(unsigned char)end;
+- (instancetype)initWithChar:(unsigned char)singleChar;
+@end
