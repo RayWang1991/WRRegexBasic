@@ -5,5 +5,12 @@
  */
 
 #import <Foundation/Foundation.h>
+@class WRCharRange;
 
-@interface WRNormallizeCharRangeSetAlgorithm : NSObject @end
+#define MAXLenCharRange 256u
+@interface WRNormalizeCharRangeSetAlgorithm : NSObject{
+ @public int table[MAXLenCharRange];
+}
+@property (nonatomic, strong, readwrite) NSMutableArray<WRCharRange *> *normalizedRanges;
+- (instancetype)initWithRanges:(NSArray <WRCharRange *> *)ranges;
+@end
