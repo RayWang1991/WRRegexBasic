@@ -4,13 +4,13 @@
  * Author: wangrui@bongmi.com
  */
 
-#import "WRNormalizeCharRangeSetAlgorithm.h"
+#import "WRCharRangeNormalizeManager.h"
 #import "WRCharRange.h"
 
-@interface WRNormalizeCharRangeSetAlgorithm ()
+@interface WRCharRangeNormalizeManager ()
 @end
 
-@implementation WRNormalizeCharRangeSetAlgorithm
+@implementation WRCharRangeNormalizeManager
 - (instancetype)initWithRanges:(NSArray <WRCharRange *> *)ranges {
   if (!ranges.count) {
     return nil;
@@ -31,7 +31,7 @@
   }
   for (WRCharRange *range in ranges) {
     unsigned int left = range.start;
-    unsigned int right = range.end + 256 ;
+    unsigned int right = range.end + 256;
     if (!record[left]) {
       record[left] = true;
       numberAxis[tail++] = left;
@@ -43,13 +43,13 @@
   }
   [self quickSort3WayForArray:numberAxis
                           low:0
-                         high:tail-1];
+                         high:tail - 1];
 
   _normalizedRanges = [NSMutableArray array];
   for (unsigned int i = 0; i < tail - 1; i++) {
     unsigned int a = numberAxis[i];
     unsigned int b = numberAxis[i + 1];
-    
+
     BOOL aR = a >= 256u;
     BOOL bR = b >= 256u;
     unsigned char aV = a & 0xFF;
@@ -87,7 +87,7 @@
   // [i, gt] unprocessed
   // [gt+1, hi] a[i] > v
   unsigned int v = array[low];
-  int lt = low , gt = high, i = low + 1;
+  int lt = low, gt = high, i = low + 1;
   while (i <= gt) {
     switch ([self compare:array[i]
                      with:v]) {
@@ -117,11 +117,11 @@
   BOOL isBRight = b >= 256u;
   unsigned int aV = a & 0xFF;
   unsigned int bV = b & 0xFF;
-  
+
   return aV < bV ? NSOrderedAscending :
-            aV > bV ? NSOrderedDescending :
-               isARight == isBRight ? NSOrderedSame :
-                  isBRight ? NSOrderedAscending : NSOrderedDescending;
+    aV > bV ? NSOrderedDescending :
+      isARight == isBRight ? NSOrderedSame :
+        isBRight ? NSOrderedAscending : NSOrderedDescending;
 }
 
 - (void)swap:(unsigned int *)array
@@ -149,5 +149,16 @@
   for (unsigned int i = last.end + 1; i < MAXLenCharRange; i++) {
     self->table[i] = -2;
   }
+}
+
+#pragma -mark decompose
+- (NSArray <WRCharRange *> *)decomposeRange:(WRCharRange *)range {
+  int left = self->table[range.start];
+  int right = self->table[range.end];
+  NSMutableArray *array = [NSMutableArray arrayWithCapacity:right - left + 1];
+  for (int i = left; i <= right; i++) {
+    [array addObject:@(i)];
+  }
+  return array;
 }
 @end
