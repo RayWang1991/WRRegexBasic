@@ -18,9 +18,18 @@ typedef NS_ENUM(NSInteger, WRRegexScannerErrorType) {
   WRRegexScannerEndInSlash,
 };
 
+typedef NS_ENUM(NSInteger, WRRegexTokenType) {
+  tokenTypeOr = 0,
+  tokenTypePlus,
+  tokenTypeAsterisk,
+  tokenTypeQues,
+  tokenTypeChar,
+  tokenTypeCharList
+};
+
 @interface WRCharTerminal : WRTerminal
-@property(nonatomic, strong, readwrite)NSArray<WRCharRange *>*ranges;
-- (instancetype)initWithRanges:(NSArray <WRCharRange *>*)ranges;
+@property (nonatomic, strong, readwrite) NSArray<WRCharRange *> *ranges;
+- (instancetype)initWithRanges:(NSArray <WRCharRange *> *)ranges;
 @end
 
 @interface WRRegexScanner : WRScanner
@@ -32,5 +41,7 @@ typedef NS_ENUM(NSInteger, WRRegexScannerErrorType) {
 - (WRTerminal *)nextToken;
 
 - (void)scanToEnd;
+
+- (void)setNumOfEof:(NSInteger)num;
 
 @end
