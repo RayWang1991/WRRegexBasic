@@ -52,25 +52,25 @@
 
     BOOL aR = a >= 256u;
     BOOL bR = b >= 256u;
-    unsigned char aV = a & 0xFF;
-    unsigned char bV = b & 0xFF;
+    WRChar aV = a & 0xFF;
+    WRChar bV = b & 0xFF;
     // LL p, q-1
     // LR p, q
     // RL p+1, q-1
     // RR p+1, q
     if (!aR && !bR) {
       [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:aV
-                                                               andEnd:bV - (unsigned char) 1u]];
+                                                               andEnd:bV - (WRChar) 1u]];
     } else if (!aR && bR) {
       [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:aV
                                                                andEnd:bV]];
     } else if (aR && !bR) {
-      if (aR + (unsigned char) 1u > aR + (unsigned char) 1u) {
-        [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:aV + (unsigned char) 1u
-                                                                 andEnd:bV - (unsigned char) 1u]];
+      if (aR + (WRChar) 1u > aR + (WRChar) 1u) {
+        [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:aV + (WRChar) 1u
+                                                                 andEnd:bV - (WRChar) 1u]];
       }
     } else {
-      [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:aV + (unsigned char) 1u
+      [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:aV + (WRChar) 1u
                                                                andEnd:bV]];
     }
   }

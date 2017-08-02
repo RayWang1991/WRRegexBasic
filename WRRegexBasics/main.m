@@ -13,6 +13,8 @@ void testLanguage();
 void testScanner();
 void examToken(WRTerminal *terminal, WRRegexTokenType type, NSArray <WRCharRange *> *rangeList);
 
+void testMapper();
+
 void testCharRange();
 void rangeContentExam(WRCharRange *range, WRChar start, WRChar end);
 
@@ -23,7 +25,8 @@ int main(int argc, const char *argv[]) {
 //    testCharRange();
 //    testCharRangeSetAlgorithm();
 //    testLanguage();
-    testScanner();
+//    testScanner();
+    testMapper();
   }
   return 0;
 }
@@ -134,6 +137,23 @@ void testScanner() {
             ]);
 }
 
+void testMapper(){
+  WRRegexScanner *scanner = [[WRRegexScanner alloc] init];
+  // basic
+  [scanner setNumOfEof:0];
+  scanner.inputStr = @"[a-df]h\\d";
+  [scanner reset];
+  [scanner startScan];
+  [scanner scanToEnd];
+  
+  WRCharRangeNormalizeMapper *mapper =
+    [[WRCharRangeNormalizeMapper alloc] initWithRanges:scanner.ranges];
+  for(WRCharTerminal *charTerminal in scanner.charTerminals){
+    charTerminal.rangeIndexes = [mapper decomposeRangeList:charTerminal.ranges];
+  }
+  ;
+}
+
 void examToken(WRTerminal *terminal, WRRegexTokenType type, NSArray <WRCharRange *> *rangeList) {
   switch (type) {
     case tokenTypeChar: {
@@ -175,14 +195,14 @@ void testCharRangeSetAlgorithm() {
                                                     andEnd:2];
   WRCharRange *range2 = [[WRCharRange alloc] initWithStart:3
                                                     andEnd:4];
-  WRCharRangeNormalizeManager *al = [[WRCharRangeNormalizeManager alloc] initWithRanges:@[range1, range2]];
+  WRCharRangeNormalizeMapper *al = [[WRCharRangeNormalizeMapper alloc] initWithRanges:@[range1, range2]];
   rangeContentExam(al.normalizedRanges[0], 0, 2);
   rangeContentExam(al.normalizedRanges[1], 3, 4);
 
   WRCharRange *range3 = [[WRCharRange alloc] initWithStart:1
                                                     andEnd:7];
-  WRCharRangeNormalizeManager
-    *al1 = [[WRCharRangeNormalizeManager alloc] initWithRanges:@[range1, range2, range3]];
+  WRCharRangeNormalizeMapper
+    *al1 = [[WRCharRangeNormalizeMapper alloc] initWithRanges:@[range1, range2, range3]];
   assert(al1.normalizedRanges.count == 4);
   rangeContentExam(al1.normalizedRanges[0], 0, 0);
   rangeContentExam(al1.normalizedRanges[1], 1, 2);
@@ -191,22 +211,22 @@ void testCharRangeSetAlgorithm() {
 
   WRCharRange *range4 = [[WRCharRange alloc] initWithStart:7
                                                     andEnd:7];
-  WRCharRangeNormalizeManager *al2 = [[WRCharRangeNormalizeManager alloc] initWithRanges:@[range4, range3]];
+  WRCharRangeNormalizeMapper *al2 = [[WRCharRangeNormalizeMapper alloc] initWithRanges:@[range4, range3]];
   assert(al2.normalizedRanges.count == 2);
   rangeContentExam(al2.normalizedRanges[0], 1, 6);
   rangeContentExam(al2.normalizedRanges[1], 7, 7);
 
   WRCharRange *range5 = [[WRCharRange alloc] initWithStart:6
                                                     andEnd:10];
-  WRCharRangeNormalizeManager
-    *al3 = [[WRCharRangeNormalizeManager alloc] initWithRanges:@[range5, range2, range1]];
+  WRCharRangeNormalizeMapper
+    *al3 = [[WRCharRangeNormalizeMapper alloc] initWithRanges:@[range5, range2, range1]];
   assert(al3.normalizedRanges.count == 3);
   rangeContentExam(al3.normalizedRanges[0], 0, 2);
   rangeContentExam(al3.normalizedRanges[1], 3, 4);
   rangeContentExam(al3.normalizedRanges[2], 6, 10);
 
-  WRCharRangeNormalizeManager
-    *al4 = [[WRCharRangeNormalizeManager alloc] initWithRanges:@[range1, range5, range2]];
+  WRCharRangeNormalizeMapper
+    *al4 = [[WRCharRangeNormalizeMapper alloc] initWithRanges:@[range1, range5, range2]];
   assert(al4.normalizedRanges.count == 3);
   rangeContentExam(al4.normalizedRanges[0], 0, 2);
   rangeContentExam(al4.normalizedRanges[1], 3, 4);
