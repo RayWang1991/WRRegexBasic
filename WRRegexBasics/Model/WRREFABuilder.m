@@ -8,6 +8,7 @@
 #import "WRRETransition.h"
 #import "WRREState.h"
 #import "WRRegexScanner.h"
+#import "WRRegexLanguage.h"
 
 @implementation WRExpression
 
@@ -18,6 +19,10 @@
     _end = end;
   }
   return self;
+}
+
+- (NSString *)debugDescription{
+  return [NSString stringWithFormat:@"%@ : %@",self.start,self.end];
 }
 
 @end
@@ -99,7 +104,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   WRTerminal *terminal = ast.terminal;
 
   switch (terminal.terminalType) {
-    case 0: {
+    case tokenTypeOr: {
       // or
       [children[0] accept:self];
       [children[1] accept:self];
@@ -113,7 +118,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       push(expression);
       break;
     }
-    case 1: {
+    case tokenTypeChar: {
       // char
       WRCharTerminal *charTerminal = (WRCharTerminal *) terminal;
       WRREState *state1 = self.newState;
@@ -124,18 +129,14 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       [self.stack addObject:newExpression(state1, state2)];
       break;
     }
-    case 2: {
-      // (
-    }
-    case 3: {
-      // )
-      assert(NO);
-    }
-    case 4: {
+    case tokenTypePlus: {
       // +
+      [children[0] accept:self];
+      WRExpression *expression1 = self.stack.lastObject;
+      newTransition(WRRETransitionTypeEpsilon, -1, expression1.end, expression1.start);
       break;
     }
-    case 5: {
+    case tokenTypeAsterisk: {
       // *
       [children[0] accept:self];
       WRREState *state1 = self.newState;
@@ -147,7 +148,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       [self.stack addObject:newExpression(state1, state2)];
       break;
     }
-    case 6: {
+    case tokenTypeQues: {
       // ?
       [children[0] accept:self];
       WRREState *state1 = self.newState;
@@ -159,14 +160,15 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       [self.stack addObject:newExpression(state1, state2)];
       break;
     }
-    case 7: {
+    case tokenTypeCancatenate: {
       // cat
       [children[0] accept:self];
       [children[1] accept:self];
+      // notice expression 1 is the latter one
       WRExpression *expression1 = pop();
       WRExpression *expression2 = pop();
-      newTransition(WRRETransitionTypeEpsilon, -1, expression1.start, expression2.end);
-      [self.stack addObject:newExpression(expression1.start, expression2.end)];
+      newTransition(WRRETransitionTypeEpsilon, -1, expression2.end, expression1.start);
+      [self.stack addObject:newExpression(expression2.start, expression1.end)];
       break;
     }
     default:assert(NO);
