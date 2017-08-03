@@ -4,13 +4,13 @@
  * Author: wangrui@bongmi.com
  */
 
-#import "WRCharRangeNormalizeManager.h"
+#import "WRCharRangeNormalizeMapper.h"
 #import "WRCharRange.h"
 
-@interface WRCharRangeNormalizeManager ()
+@interface WRCharRangeNormalizeMapper ()
 @end
 
-@implementation WRCharRangeNormalizeManager
+@implementation WRCharRangeNormalizeMapper
 - (instancetype)initWithRanges:(NSArray <WRCharRange *> *)ranges {
   if (!ranges.count) {
     return nil;
@@ -135,7 +135,7 @@
 - (void)buildAlphabetTableWithNormalizedCharRanges:(NSArray <WRCharRange *> *)ranges {
   WRCharRange *first = ranges.firstObject;
   WRCharRange *last = ranges.lastObject;
-  for (unsigned int i = 0; i < first.start; i++) {
+  for (unsigned int i = 0; i < MAXLenCharRange; i++) {
     self->table[i] = -1;
   }
   int index = 0;
@@ -146,18 +146,32 @@
     }
     index++;
   }
-  for (unsigned int i = last.end + 1; i < MAXLenCharRange; i++) {
-    self->table[i] = -2;
-  }
 }
 
 #pragma -mark decompose
-- (NSArray <WRCharRange *> *)decomposeRange:(WRCharRange *)range {
+- (NSArray <NSNumber *> *)decomposeRange:(WRCharRange *)range {
   int left = self->table[range.start];
   int right = self->table[range.end];
+  
   NSMutableArray *array = [NSMutableArray arrayWithCapacity:right - left + 1];
   for (int i = left; i <= right; i++) {
-    [array addObject:@(i)];
+    if(i >= 0 && ![array containsObject:@(i)]){
+      [array addObject:@(i)];
+    }
+  }
+  return array;
+}
+
+- (NSArray <NSNumber *> *)decomposeRangeList:(NSArray <WRCharRange *>*)rangeList{
+  NSMutableArray *array = [NSMutableArray array];
+  for(WRCharRange *range in rangeList){
+    int left = self->table[range.start];
+    int right = self->table[range.end];
+    for (int i = left; i <= right; i++) {
+      if(i >= 0 && ![array containsObject:@(i)]){
+        [array addObject:@(i)];
+      }
+    }
   }
   return array;
 }
