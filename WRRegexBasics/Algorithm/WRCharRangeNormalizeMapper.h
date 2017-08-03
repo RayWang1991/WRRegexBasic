@@ -8,10 +8,14 @@
 @class WRCharRange;
 
 #define MAXLenCharRange 256u
-@interface WRCharRangeNormalizeManager : NSObject{
- @public int table[MAXLenCharRange];
+@interface WRCharRangeNormalizeMapper : NSObject {
+ @public
+  int table[MAXLenCharRange];
 }
 @property (nonatomic, strong, readwrite) NSMutableArray<WRCharRange *> *normalizedRanges;
+
 - (instancetype)initWithRanges:(NSArray <WRCharRange *> *)ranges;
-- (NSArray <WRCharRange *>*)decomposeRange:(WRCharRange *)range;
+- (NSArray <NSNumber *> *)decomposeRange:(WRCharRange *)range;
+- (NSArray <NSNumber *> *)decomposeRangeList:(NSArray <WRCharRange *>*)rangeList;
+
 @end
