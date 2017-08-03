@@ -5,11 +5,12 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "WRRegexUtils.h"
 
 @interface WRCharRange : NSObject
-@property (nonatomic, assign, readwrite) unsigned char start;
-@property (nonatomic, assign, readwrite) unsigned char end;
-- (instancetype)initWithStart:(unsigned char)start
-                       andEnd:(unsigned char)end;
-- (instancetype)initWithChar:(unsigned char)singleChar;
+@property (nonatomic, assign, readwrite) WRChar start;
+@property (nonatomic, assign, readwrite) WRChar end;
+- (instancetype)initWithStart:(WRChar)start
+                       andEnd:(WRChar)end;
+- (instancetype)initWithChar:(WRChar)singleChar;
 @end

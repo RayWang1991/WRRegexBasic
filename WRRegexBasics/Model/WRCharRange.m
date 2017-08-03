@@ -5,21 +5,22 @@
  */
 
 #import "WRCharRange.h"
+#import "WRRegexUtils.h"
 
 @implementation WRCharRange
 
-- (instancetype)initWithStart:(unsigned char)start
-                       andEnd:(unsigned char)end {
+- (instancetype)initWithStart:(WRChar)start
+                       andEnd:(WRChar)end {
   if (self = [super init]) {
-    unsigned char less = start < end ? start : end;
-    unsigned char great = start < end ? end : start;
+    WRChar less = start < end ? start : end;
+    WRChar great = start < end ? end : start;
     _start = less;
     _end = great;
   }
   return self;
 }
 
-- (instancetype)initWithChar:(unsigned char)singleChar {
+- (instancetype)initWithChar:(WRChar)singleChar {
   if (self = [super init]) {
     _start = _end = singleChar;
   }
@@ -36,7 +37,7 @@
 }
 
 - (NSString *)description{
-  return [NSString stringWithFormat:@"[%u,%u]",self.start,self.end];
+  return [NSString stringWithFormat:@"[%c,%c]",self.start,self.end];
 }
 
 #pragma mark -function
