@@ -7,14 +7,18 @@
 #import <Foundation/Foundation.h>
 #import "WRParsingBasicLib.h"
 #import "WRREState.h"
-#import "WRCharRangeNormalizeManager.h"
+#import "WRCharRangeNormalizeMapper.h"
 
-@interface WRRENFABuilder : WRTreeVisitor
+@interface WRREFABuilder : WRTreeVisitor
 
-- (instancetype)initWithCharRangeMapper:(WRCharRangeNormalizeManager *)mapper
+- (instancetype)initWithCharRangeMapper:(WRCharRangeNormalizeMapper *)mapper
                                     ast:(WRAST *)ast;
 
-- (WRREState *)nfa;
+- (WRREState *)epsilonNFAStart;
+
+- (void)epsilonNFA2NFA;
+
+- (WRREState *)NFAStart;
 
 - (void)visit:(WRAST *)ast
  withChildren:(NSArray<WRAST *> *)children;
