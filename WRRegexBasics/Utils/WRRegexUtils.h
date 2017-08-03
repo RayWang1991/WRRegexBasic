@@ -6,4 +6,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface WRRegexUtils : NSObject @end
+typedef unsigned char WRChar;
+
+@interface WRRegexUtils : NSObject
+@end
