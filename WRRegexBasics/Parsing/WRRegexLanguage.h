@@ -5,5 +5,17 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "WRParsingBasicLib.h"
 
-@interface WRRegexLanguage : NSObject @end
+typedef NS_ENUM(NSInteger, WRRegexTokenType) {
+  tokenTypeOr = 0,
+  tokenTypeCancatenate,
+  tokenTypePlus,
+  tokenTypeAsterisk,
+  tokenTypeQues,
+  tokenTypeChar,
+  tokenTypeCharList,
+};
+
+@interface WRRegexLanguage : WRLanguage
+@end
