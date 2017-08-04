@@ -5,6 +5,7 @@
  */
 
 #import "WRRegexScanner.h"
+#import "WRRegexLanguage.h"
 
 @implementation WRCharTerminal
 - (instancetype)initWithRanges:(NSArray <WRCharRange *> *)ranges {
@@ -13,6 +14,11 @@
   }
   return self;
 }
+
+- (NSString *)debugDescription{
+  return [NSString stringWithFormat:@"%@ :%@\n",self.ranges,self.rangeIndexes];
+}
+
 @end
 
 const NSString *kWRRegexScannerErrorDomain = @"WR.Error.Regex.Scanner";
@@ -42,8 +48,11 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
 @property (nonatomic, assign, readwrite) NSInteger currentLine;
 @property (nonatomic, assign, readwrite) NSInteger numOfEof;
 // range list
+@property (nonatomic, strong, readwrite) NSMutableArray<WRCharRange *> *rangesInternal;
+@property (nonatomic, strong, readwrite) NSMutableArray<WRCharTerminal *> *charTerminalsInternal;
 @property (nonatomic, assign, readwrite) WRChar charRangeStart;
 @property (nonatomic, strong, readwrite) NSMutableArray<WRCharRange *> *rangeList;
+
 @end
 
 #define inputCharAt(x) (WRChar)[self.inputStr characterAtIndex:x]
@@ -66,12 +75,16 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
   _currentColumn = 1;
   _currentLine = 1;
   _rangeList = [NSMutableArray array];
+  _charTerminalsInternal = [NSMutableArray array];
+  _rangesInternal = [NSMutableArray array];
   [self.tokens removeAllObjects];
   [self.errors removeAllObjects];
 }
 
-- (void)reset {
+- (void)resetAll {
   [_rangeList removeAllObjects];
+  [_rangesInternal removeAllObjects];
+  [_charTerminalsInternal removeAllObjects];
   self.tokenIndex = 0;
 }
 
@@ -86,6 +99,14 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
   return [self tokenAtIndex:self.tokenIndex++];
 }
 
+- (NSArray <WRCharRange *> *)ranges{
+  return self.rangesInternal;
+}
+
+- (NSArray <WRCharTerminal *> *)charTerminals{
+  return self.charTerminalsInternal;
+}
+
 - (void)scanToEnd {
   NSInteger len = self.inputStr.length;
   WRRegexTokenType type;
@@ -98,9 +119,13 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
     switch (_state) {
       case Begin: {
         switch (c) {
-          case '*': {
+          case '|': {
             type = tokenTypeOr;
-            _currentLine++;
+            [self addTerminalWithType:type];
+            break;
+          }
+          case '*': {
+            type = tokenTypeAsterisk;
             [self addTerminalWithType:type];
             break;
           }
@@ -296,10 +321,14 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
     terminal = charTerminal;
     WRCharRange *range = newCharRangeChar(c);
     charTerminal.ranges = @[range];
+    [self.charTerminalsInternal addObject:charTerminal];
+    [self.rangesInternal addObject:range];
   } else {
     WRCharTerminal *charTerminal = [WRCharTerminal tokenWithSymbol:@"char"];
     terminal = charTerminal;
     charTerminal.ranges = rangeList;
+    [self.charTerminalsInternal addObject:charTerminal];
+    [self.rangesInternal addObjectsFromArray:rangeList];
   }
 
   terminal.terminalType = tokenTypeChar;
@@ -332,12 +361,16 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
       terminal = charTerminal;
       WRCharRange *range = newCharRangeChar(inputCharAt(_strIndex));
       charTerminal.ranges = @[range];
+      [self.charTerminalsInternal addObject:charTerminal];
+      [self.rangesInternal addObject:range];
       break;
     }
     case tokenTypeCharList: {
       WRCharTerminal *charTerminal = [WRCharTerminal tokenWithSymbol:@"char"];
       terminal = charTerminal;
       charTerminal.ranges = [NSArray arrayWithArray:self.rangeList];
+      [self.charTerminalsInternal addObject:charTerminal];
+      [self.rangesInternal addObjectsFromArray:self.rangeList];
       [self.rangeList removeAllObjects];
       break;
     }
