@@ -139,6 +139,16 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
             [self addTerminalWithType:type];
             break;
           }
+          case '(':{
+            type = tokenTypeLeftBracket;
+            [self addTerminalWithType:type];
+            break;
+          }
+          case ')':{
+            type = tokenTypeRightBracket;
+            [self addTerminalWithType:type];
+            break;
+          }
           case '[': {
             _state = InCharSet;
             break;
@@ -319,6 +329,7 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
   if (c) {
     WRCharTerminal *charTerminal = [WRCharTerminal tokenWithSymbol:@"char"];
     terminal = charTerminal;
+    terminal.terminalType = tokenTypeChar;
     WRCharRange *range = newCharRangeChar(c);
     charTerminal.ranges = @[range];
     [self.charTerminalsInternal addObject:charTerminal];
@@ -326,12 +337,12 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
   } else {
     WRCharTerminal *charTerminal = [WRCharTerminal tokenWithSymbol:@"char"];
     terminal = charTerminal;
+    terminal.terminalType = tokenTypeCharList;
     charTerminal.ranges = rangeList;
     [self.charTerminalsInternal addObject:charTerminal];
     [self.rangesInternal addObjectsFromArray:rangeList];
   }
 
-  terminal.terminalType = tokenTypeChar;
   terminal.contentInfo = contentInfo;
   [self.tokens addObject:terminal];
 }
@@ -354,6 +365,14 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
     }
     case tokenTypeQues: {
       terminal = [WRTerminal tokenWithSymbol:@"?"];
+      break;
+    }
+    case tokenTypeLeftBracket: {
+      terminal = [WRTerminal tokenWithSymbol:@"("];
+      break;
+    }
+    case tokenTypeRightBracket: {
+      terminal = [WRTerminal tokenWithSymbol:@")"];
       break;
     }
     case tokenTypeChar: {
