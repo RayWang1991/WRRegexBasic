@@ -118,7 +118,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       push(expression);
       break;
     }
-    case tokenTypeChar: {
+    case tokenTypeChar:
+    case tokenTypeCharList: {
       // char
       WRCharTerminal *charTerminal = (WRCharTerminal *) terminal;
       WRREState *state1 = self.newState;
