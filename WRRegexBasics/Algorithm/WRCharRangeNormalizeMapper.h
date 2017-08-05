@@ -5,9 +5,9 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "WRRegexUtils.h"
 @class WRCharRange;
 
-#define MAXLenCharRange 256u
 @interface WRCharRangeNormalizeMapper : NSObject {
  @public
   int table[MAXLenCharRange];
