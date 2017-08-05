@@ -11,14 +11,14 @@
 
 @implementation WRRegexLanguage
 - (instancetype)init {
+  // TODO modify : delete single, use char instead
   if (self = [super
     initWithRuleStrings:@[
       @"S -> Frag",
       @"Frag -> Frag or Seq | Seq ",
       @"Seq -> Seq Unit | Unit ",
-      @"Unit -> Single | Single PostOp | ( Frag ) ",
+      @"Unit -> char | char PostOp | ( Frag ) ",
       @"PostOp -> + | * | ? ",
-      @"Single -> char | charList ",
     ]
          andStartSymbol:@"S"]) {
     [self addVirtualTerminal:WRRELanguageVirtualConcatenate];
@@ -125,19 +125,17 @@
         // Unit
         switch (nonterminal.ruleIndex) {
           case 0: {
-            // Unit -> Single
-            [children[0] accept:self];
-            nonterminal.synAttr = children[0].synAttr;
+            // Unit -> char
+            nonterminal.synAttr =  [[WRAST alloc] initWithWRTerminal:children[0]];
             break;
           }
           case 1: {
-            // Unit -> Single PostOp
-            WRToken *single = children[0];
+            // Unit -> char PostOp
+            WRTerminal *char0 = children[0];
             WRToken *postOp = children[1];
-            [single accept:self];
             [postOp accept:self];
-            WRAST *ast = [[WRAST alloc] initWithWRTerminal:postOp.synAttr];
-            [ast addChild:single.synAttr];
+            WRAST *ast = postOp.synAttr;
+            [ast addChild:[[WRAST alloc] initWithWRTerminal:char0]];
             nonterminal.synAttr = ast;
             break;
           }
