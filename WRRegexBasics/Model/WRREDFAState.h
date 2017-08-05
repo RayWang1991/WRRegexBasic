@@ -5,16 +5,14 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "WRREState.h"
 
-@class WRRENFAState;
+@interface WRREDFAState : WRREState
+@property (nonatomic, strong, readwrite) NSArray <WRREState *> *sortedStates;
 
-@interface WRREDFAState : NSObject
-@property (nonatomic, assign, readwrite) NSUInteger stateId;
-@property (nonatomic, strong, readwrite) NSArray <WRRENFAState *> *NFAStates;
-
-- (instancetype)initWithNFAStateArray:(NSArray <WRRENFAState *> *)NFAStateArray;
-+ (NSArray <WRRENFAState *> *)NFAStateArrayWithSet:(NSSet <WRRENFAState *> *)NFAStateSet;
-- (instancetype)initWithNFAStateSet:(NSSet <WRRENFAState *> *)NFAStateSet;
+- (instancetype)initWithNFAStateArray:(NSArray <WRREState *> *)NFAStateArray;
++ (NSArray <WRREState *> *)NFAStateArrayWithSet:(NSSet <WRREState *> *)NFAStateSet;
+- (instancetype)initWithNFAStateSet:(NSSet <WRREState *> *)NFAStateSet;
 
 - (void)trimWithStateId:(NSUInteger)stateId;
 @end

@@ -11,8 +11,7 @@
 
 - (instancetype)initWithNFAStateArray:(NSArray <WRRENFAState *> *)NFAStateArray {
   if (self = [super init]) {
-    _NFAStates = NFAStateArray;
-    _stateId = 0;
+    _sortedStates = NFAStateArray;
   }
   return self;
 }
@@ -33,49 +32,51 @@
 }
 
 - (void)trimWithStateId:(NSUInteger)stateId {
-  self.NFAStates = nil;
-  _stateId = stateId;
+  self.sortedStates = nil;
+  self.stateId = stateId;
 }
 
 #pragma mark - NSObject hash
+// -1 under construction, <= -2 use hash, >= 0 use id
+
 - (NSUInteger)hash {
-  if (_stateId) {
-    return _stateId;
+  if (self.stateId >= 0) {
+    return self.stateId;
+  } else if (self.stateId == -1) {
+    assert(NO);
+    return 0;
   } else {
     return self.BKDRHash;
   }
 }
 
-// BKDR hash
 - (NSUInteger)BKDRHash {
   NSUInteger seed = 131;
   NSUInteger hash = 0;
-  for (WRRENFAState *state in self.NFAStates) {
+  for (WRREState *state in self.sortedStates) {
     hash = (hash * seed) + state.stateId;
   }
   return hash;
 }
 
+- (NSUInteger)DJBHash {
+  NSUInteger hash = 5381;
+  for (WRREState *state in self.sortedStates) {
+    hash += (hash << 5) + state.stateId;
+  }
+  return hash;
+}
+
 - (BOOL)isEqual:(id)object {
-  if (![object isKindOfClass:[WRREDFAState class]]) {
+  if (![object isKindOfClass:[self class]]) {
+    return NO;
+  } else if (self.stateId >= 0) {
+    return [object stateId] == self.stateId;
+  } else if (self.stateId == -1) {
     return NO;
   } else {
-    WRREDFAState *other = (WRREDFAState *) object;
-    if (other.stateId && self.stateId) {
-      return other.stateId == self.stateId;
-    } else {
-      if (self.NFAStates.count != other.NFAStates.count) {
-        return NO;
-      } else {
-        __block BOOL res = YES;
-        [self.NFAStates enumerateObjectsUsingBlock:
-          ^(WRRENFAState *obj, NSUInteger idx, BOOL *stop) {
-            res = obj.stateId != other.NFAStates[idx].stateId;
-            *stop = res;
-          }];
-        return res;
-      }
-    }
+    return [object BKDRHash] == [self BKDRHash] && [object DJBHash] == [self DJBHash];
   }
 }
+
 @end
