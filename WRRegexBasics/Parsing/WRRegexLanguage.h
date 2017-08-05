@@ -13,6 +13,8 @@ typedef NS_ENUM(NSInteger, WRRegexTokenType) {
   tokenTypePlus,
   tokenTypeAsterisk,
   tokenTypeQues,
+  tokenTypeLeftBracket,
+  tokenTypeRightBracket,
   tokenTypeChar,
   tokenTypeCharList,
 };
