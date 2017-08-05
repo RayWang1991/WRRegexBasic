@@ -10,9 +10,7 @@
 @interface WRREDFAState : WRREState
 @property (nonatomic, strong, readwrite) NSArray <WRREState *> *sortedStates;
 
-- (instancetype)initWithNFAStateArray:(NSArray <WRREState *> *)NFAStateArray;
-+ (NSArray <WRREState *> *)NFAStateArrayWithSet:(NSSet <WRREState *> *)NFAStateSet;
-- (instancetype)initWithNFAStateSet:(NSSet <WRREState *> *)NFAStateSet;
+- (instancetype)initWithSortedStates:(NSArray <WRREState *> *)sortedStates;
 
 - (void)trimWithStateId:(NSUInteger)stateId;
 @end

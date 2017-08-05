@@ -5,30 +5,14 @@
  */
 
 #import "WRREDFAState.h"
-#import "WRRENFAState.h"
 
 @implementation WRREDFAState
 
-- (instancetype)initWithNFAStateArray:(NSArray <WRRENFAState *> *)NFAStateArray {
-  if (self = [super init]) {
-    _sortedStates = NFAStateArray;
+- (instancetype)initWithSortedStates:(NSArray <WRREState *> *)sortedStates {
+  if (self = [super initWithStateId:-2]) {
+    _sortedStates = sortedStates;
   }
   return self;
-}
-
-- (instancetype)initWithNFAStateSet:(NSSet <WRRENFAState *> *)NFAStateSet {
-  return [self initWithNFAStateArray:[WRREDFAState NFAStateArrayWithSet:NFAStateSet]];
-}
-
-+ (NSArray <WRRENFAState *> *)NFAStateArrayWithSet:(NSSet <WRRENFAState *> *)NFAStateSet {
-  NSArray *array = [NFAStateSet.allObjects sortedArrayUsingComparator:
-    ^NSComparisonResult(WRRENFAState *obj1, WRRENFAState *obj2) {
-      NSUInteger id1 = obj1.stateId;
-      NSUInteger id2 = obj2.stateId;
-      return id1 == id2 ? NSOrderedSame :
-        (id1 > id2 ? NSOrderedAscending : NSOrderedDescending);
-    }];
-  return array;
 }
 
 - (void)trimWithStateId:(NSUInteger)stateId {
@@ -46,6 +30,7 @@
     assert(NO);
     return 0;
   } else {
+    NSUInteger res = self.BKDRHash;
     return self.BKDRHash;
   }
 }
