@@ -10,12 +10,21 @@
 
 #endif /* WRRegexLib_h */
 
+// Parsing
+#import "WRRegexLanguage.h"
+#import "WRRegexScanner.h"
+
 // Algorithm
-#import "WRNormalizeCharRangeSetAlgorithm.h"
+#import "WRCharRangeNormalizeMapper.h"
 
 // Model
 #import "WRCharRange.h"
 #import "WRREAutoma.h"
 #import "WRREDFAState.h"
-#import "WRRENFAState.h"
+#import "WRREState.h"
 #import "WRRETransition.h"
+#import "WRREFABuilder.h"
+
+//Utils
+#import "WRRegexUtils.h"
+
