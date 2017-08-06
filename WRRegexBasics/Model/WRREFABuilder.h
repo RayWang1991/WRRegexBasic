@@ -6,9 +6,10 @@
 
 #import <Foundation/Foundation.h>
 #import "WRParsingBasicLib.h"
-#import "WRREState.h"
 #import "WRCharRangeNormalizeMapper.h"
 
+@class WRREState;
+@class WRREDFAState;
 @interface WRREFABuilder : WRTreeVisitor {
  @public
   int **dfaTable;
@@ -22,6 +23,10 @@
 - (void)epsilonNFA2NFA;
 
 - (WRREState *)NFAStart;
+
+- (void)NFA2DFA;
+
+- (WRREDFAState *)DFAStart;
 
 - (void)visit:(WRAST *)ast
  withChildren:(NSArray<WRAST *> *)children;
