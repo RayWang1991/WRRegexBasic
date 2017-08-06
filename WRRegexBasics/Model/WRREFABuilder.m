@@ -9,6 +9,7 @@
 #import "WRREState.h"
 #import "WRRegexScanner.h"
 #import "WRRegexLanguage.h"
+#import "WRREDFAState.h"
 
 @implementation WRExpression
 
@@ -21,8 +22,10 @@
   return self;
 }
 
-- (NSString *)debugDescription{
-  return [NSString stringWithFormat:@"%@ : %@",self.start,self.end];
+- (NSString *)debugDescription {
+  return [NSString stringWithFormat:@"%@ : %@",
+                                    self.start,
+                                    self.end];
 }
 
 @end
@@ -33,8 +36,10 @@
 @property (nonatomic, strong, readwrite) WRCharRangeNormalizeMapper *mapper;
 @property (nonatomic, assign, readwrite) NSInteger stateId;
 @property (nonatomic, strong, readwrite) NSMutableArray <WRREState *> *allStates;
+@property (nonatomic, strong, readwrite) NSMutableArray <WRREDFAState *> *allDFAStates;
 @property (nonatomic, strong, readwrite) WRREState *epsilonNFAStart;
 @property (nonatomic, strong, readwrite) WRREState *NFAStart; // without epsilon transitions
+@property (nonatomic, strong, readwrite) WRREDFAState *DFAStart; // without epsilon transitions
 
 @end
 
@@ -61,7 +66,7 @@
   return _epsilonNFAStart;
 }
 
-- (WRREState *)NFAStart{
+- (WRREState *)NFAStart {
   if (!_NFAStart) {
     [self epsilonNFA2NFA];
     _NFAStart = self.epsilonNFAStart;
@@ -91,13 +96,6 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 
 # define pop() self.stack.lastObject; [self.stack removeLastObject];
 # define push(x) [self.stack addObject: x ];
-
-//@"S -> Frag",
-//@"Frag -> Frag or Seq | Seq ",
-//@"Seq -> Seq Unit | Unit ",
-//@"Unit -> char | char PostOp | ( Frag )",
-//@"PostOp -> + | * | ? ",
-// cat
 
 - (void)visit:(WRAST *)ast
  withChildren:(NSArray<WRAST *> *)children {
@@ -242,6 +240,99 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     [availableTransitions removeAllObjects];
     [epsilonSet removeAllObjects];
   }
+  NSMutableArray *allEpsilonNFAStates = self.allStates;
+  [allEpsilonNFAStates removeAllObjects];
+  self.allStates = availableStates;
+}
+
+- (void)NFA2DFA {
+//  _stateId = 0;
+  _allDFAStates = [NSMutableArray array];
+  NSMutableSet <WRREDFAState *> *recordSet = [NSMutableSet set];
+  NSMutableArray <WRREDFAState *> *workList = [NSMutableArray array];
+  NSMutableDictionary <NSNumber *, NSMutableArray <WRREState *> *> *transitionDict = [NSMutableDictionary dictionary];
+
+  _DFAStart = [[WRREDFAState alloc] initWithSortedStates:@[_NFAStart]];
+  [_allDFAStates addObject:_DFAStart];
+  [recordSet addObject:_DFAStart];
+  [workList addObject:_DFAStart];
+
+  while (workList.count) {
+    WRREDFAState *todoState = workList.lastObject;
+    [workList removeLastObject];
+    [transitionDict removeAllObjects];
+    for (WRREState *nfaState in todoState.sortedStates) {
+      // dispose final id
+      if (nfaState.finalId) {
+        todoState.finalId = nfaState.finalId;
+      }
+      // construct transition table dict
+      for (WRRETransition *transition in nfaState.toTransitionList) {
+        // TODO currently testing normal is redundant
+        if (transition.type == WRLR0NFATransitionTypeNormal) {
+          NSMutableArray *array = transitionDict[@(transition.index)];
+          if (nil == array) {
+            array = [NSMutableArray arrayWithObject:transition.target];
+          } else {
+            [array addObject:transition.target];
+          }
+        }
+      }
+    }
+    for (NSNumber *index in transitionDict.allKeys) {
+      // notice that the char range is not copied here
+      NSMutableArray *array = transitionDict[index];
+      [array sortUsingComparator:^NSComparisonResult(WRREState *state1, WRREState *state2) {
+        return state1.stateId - state2.stateId;
+      }];
+      WRREDFAState *state = [[WRREDFAState alloc] initWithSortedStates:array];
+      WRREDFAState *recordState = [recordSet member:state];
+      if (nil == recordState) {
+        recordState = state;
+        [recordSet addObject:recordState];
+        [_allDFAStates addObject:recordState];
+      }
+      newTransition(WRRETransitionTypeNormal, index.unsignedCharValue, todoState, state);
+    }
+  }
+
+  // post dispose
+  // malloc two-dim array
+  // TODO
+
+  NSUInteger n = self.allDFAStates.count;
+  NSUInteger m = self.mapper.normalizedRanges.count;
+
+  self->dfaTable = (int **) malloc(sizeof(int *) * n);
+  for (NSUInteger i = 0; i < n; i++) {
+    self->dfaTable[i] = (int *) malloc(sizeof(int) * m);
+    memset(self->dfaTable[i], -1, sizeof(int) * m);
+  }
+
+  _stateId = 0;
+  for (WRREDFAState *state in self.allDFAStates) {
+    [state trimWithStateId:_stateId++];
+  }
+  NSUInteger i = 0;
+  for (WRREDFAState *state in self.allDFAStates) {
+    for (WRRETransition *transition in state.toTransitionList) {
+      assert(transition.index < m);
+      // i < n
+      self->dfaTable[i][transition.index] = (int) transition.target.stateId;
+    }
+    i++;
+  }
+}
+
+- (void)dealloc {
+  for (NSUInteger i = 0; i < self.allDFAStates.count; i++) {
+    free(self->dfaTable[i]);
+  }
+  free(self->dfaTable);
+}
+
+- (void)DFACompress {
+
 }
 
 @end

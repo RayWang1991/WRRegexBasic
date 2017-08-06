@@ -9,7 +9,10 @@
 #import "WRREState.h"
 #import "WRCharRangeNormalizeMapper.h"
 
-@interface WRREFABuilder : WRTreeVisitor
+@interface WRREFABuilder : WRTreeVisitor {
+ @public
+  int **dfaTable;
+}
 
 - (instancetype)initWithCharRangeMapper:(WRCharRangeNormalizeMapper *)mapper
                                     ast:(WRAST *)ast;
