@@ -17,7 +17,7 @@
       @"S -> Frag",
       @"Frag -> Frag or Seq | Seq ",
       @"Seq -> Seq Unit | Unit ",
-      @"Unit -> char | char PostOp | ( Frag ) ",
+      @"Unit -> char | ( Frag ) | Unit PostOp ",
       @"PostOp -> + | * | ? ",
     ]
          andStartSymbol:@"S"]) {
@@ -130,20 +130,21 @@
             break;
           }
           case 1: {
-            // Unit -> char PostOp
-            WRTerminal *char0 = children[0];
-            WRToken *postOp = children[1];
-            [postOp accept:self];
-            WRAST *ast = postOp.synAttr;
-            [ast addChild:[[WRAST alloc] initWithWRTerminal:char0]];
-            nonterminal.synAttr = ast;
-            break;
-          }
-          case 2: {
             // Unit -> ( Frag )
             WRToken *frag = children[1];
             [frag accept:self];
             nonterminal.synAttr = frag.synAttr;
+            break;
+          }
+          case 2: {
+            // Unit -> Unit PostOp
+            WRToken *unit = children[0];
+            WRToken *postOp = children[1];
+            [unit accept:self];
+            [postOp accept:self];
+            WRAST *ast = postOp.synAttr;
+            [ast addChild:unit.synAttr];
+            nonterminal.synAttr = ast;
             break;
           }
           default:assert(NO);
