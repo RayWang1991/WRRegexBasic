@@ -9,6 +9,10 @@
 @class WRRENFAState;
 @class WRRENFATransition;
 @class WRREDFAState;
-@interface WRREAutoma : NSObject
+@class WRREState;
+@class WRCharRange;
+@class WRCharRangeNormalizeMapper;
 
+@interface WRREAutoma : NSObject
+- (instancetype)initWithStartState:(WRREState *)state;
 @end
