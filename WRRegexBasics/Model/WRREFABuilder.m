@@ -74,6 +74,13 @@
   return _NFAStart;
 }
 
+- (WRREDFAState *)DFAStart{
+  if(!_DFAStart){
+    [self NFA2DFA];
+  }
+  return _DFAStart;
+}
+
 - (WRREState *)newState {
   WRREState *state = [[WRREState alloc] initWithStateId:_stateId++];
   [self.allStates addObject:state];
@@ -249,6 +256,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 //  _stateId = 0;
   _allDFAStates = [NSMutableArray array];
   NSMutableSet <WRREDFAState *> *recordSet = [NSMutableSet set];
+  NSMutableSet <WRREState *> *NFASet = [NSMutableSet set];
   NSMutableArray <WRREDFAState *> *workList = [NSMutableArray array];
   NSMutableDictionary <NSNumber *, NSMutableArray <WRREState *> *> *transitionDict = [NSMutableDictionary dictionary];
 
@@ -262,6 +270,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     [workList removeLastObject];
     [transitionDict removeAllObjects];
     for (WRREState *nfaState in todoState.sortedStates) {
+      // reset
+      [NFASet removeAllObjects];
       // dispose final id
       if (nfaState.finalId) {
         todoState.finalId = nfaState.finalId;
@@ -273,8 +283,13 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
           NSMutableArray *array = transitionDict[@(transition.index)];
           if (nil == array) {
             array = [NSMutableArray arrayWithObject:transition.target];
+            [transitionDict setObject:array
+                               forKey:@(transition.index)];
           } else {
-            [array addObject:transition.target];
+            if(![NFASet containsObject:transition.target]){
+              [array addObject:transition.target];
+              [NFASet addObject:transition.target];
+            }
           }
         }
       }
@@ -291,8 +306,9 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
         recordState = state;
         [recordSet addObject:recordState];
         [_allDFAStates addObject:recordState];
+        [workList addObject:recordState];
       }
-      newTransition(WRRETransitionTypeNormal, index.unsignedCharValue, todoState, state);
+      newTransition(WRRETransitionTypeNormal, index.unsignedCharValue, todoState, recordState);
     }
   }
 
@@ -325,10 +341,13 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 - (void)dealloc {
-  for (NSUInteger i = 0; i < self.allDFAStates.count; i++) {
-    free(self->dfaTable[i]);
+  if (self.allDFAStates.count) {
+    // free dfa table
+    for (NSUInteger i = 0; i < self.allDFAStates.count; i++) {
+      free(self->dfaTable[i]);
+    }
+    free(self->dfaTable);
   }
-  free(self->dfaTable);
 }
 
 - (void)DFACompress {
