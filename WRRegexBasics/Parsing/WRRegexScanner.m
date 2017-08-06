@@ -6,6 +6,7 @@
 
 #import "WRRegexScanner.h"
 #import "WRRegexLanguage.h"
+#import "WRRegexUtils.h"
 
 @implementation WRCharTerminal
 - (instancetype)initWithRanges:(NSArray <WRCharRange *> *)ranges {
@@ -119,6 +120,15 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
     switch (_state) {
       case Begin: {
         switch (c) {
+          case '.':{
+            // any
+            type = tokenTypeCharList;
+            // notice that \0 (eof) is not included here
+            [self.rangeList addObject:[[WRCharRange alloc] initWithStart:1
+                                                                  andEnd:MAXLenCharRange - 1]];
+            [self addTerminalWithType:type];
+            break;
+          }
           case '|': {
             type = tokenTypeOr;
             [self addTerminalWithType:type];
@@ -202,6 +212,7 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
         break;
       }
       case InCharSetOneChar: {
+        // in '[', finished match at least one valid char or char range, distinguish from '[' case '^'
         switch (c) {
           case ']': {
             [self addTerminalWithType:tokenTypeCharList];
@@ -234,7 +245,6 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
             // may be
           }
           default: {
-            // look ahead
             // here '-' is included
             [self.rangeList addObject:[[WRCharRange alloc] initWithStart:_charRangeStart
                                                                   andEnd:c]];
