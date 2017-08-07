@@ -10,9 +10,13 @@
 		3AED25FC088328EA1C322E6E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2FA81FB2D7DAB070A83B /* main.m */; };
 		3AED265D119A44C049350B39 /* WRREDFAState.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED20AAB1B3C61011662011 /* WRREDFAState.m */; };
 		3AED270E9CE1B17171295A76 /* WRCharRange.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2A3F26B1B0C7C59CA56C /* WRCharRange.m */; };
+		3AED27D388C1AD8BECA07108 /* WRRegexScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED26B1FD66A163DFC11249 /* WRRegexScanner.m */; };
 		3AED2A78AA0C99601F1D7383 /* WRRETransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2F627824EF16C4505BA6 /* WRRETransition.m */; };
-		3AED2CBA0CED415C11F65F8F /* WRNormalizeCharRangeSetAlgorithm.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2F9A0E715A7D72F53670 /* WRNormalizeCharRangeSetAlgorithm.m */; };
-		3AED2D97859C033E1AF71336 /* WRRENFAState.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2F1441ADE5EB60DFE028 /* WRRENFAState.m */; };
+		3AED2B917E635A89EECE8185 /* WRRegexUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2C5E0E0407F8CCB4C3AD /* WRRegexUtils.m */; };
+		3AED2CAD60B0F22831D837F0 /* WRRegexLanguage.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED29ABF036AE935AD06218 /* WRRegexLanguage.m */; };
+		3AED2CBA0CED415C11F65F8F /* WRCharRangeNormalizeMapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2F9A0E715A7D72F53670 /* WRCharRangeNormalizeMapper.m */; };
+		3AED2E092846A953B3327E54 /* WRREFABuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2C4BE24B395A4E62585A /* WRREFABuilder.m */; };
+		3AED2EE0F25C0492F3809717 /* WRREState.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED26632B340FF8ECC2579C /* WRREState.m */; };
 		3AED2F28919494FCE103666C /* WRREAutoma.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2217C21A7B105B0D5A91 /* WRREAutoma.m */; };
 		4DFEBA3BDFB2AA0F75D58229 /* libPods-WRRegexBasics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D02CA13FB586BA4AE945C29C /* libPods-WRRegexBasics.a */; };
 /* End PBXBuildFile section */
@@ -34,17 +38,25 @@
 		3AED20AAB1B3C61011662011 /* WRREDFAState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRREDFAState.m; sourceTree = "<group>"; };
 		3AED2217C21A7B105B0D5A91 /* WRREAutoma.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRREAutoma.m; sourceTree = "<group>"; };
 		3AED226FD7C2206B2D4B9AB2 /* WRCharRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRCharRange.h; sourceTree = "<group>"; };
-		3AED27A0FDB35FA34ECCD99A /* WRRENFAState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRENFAState.h; sourceTree = "<group>"; };
-		3AED28CE1EAEAEDF417598A9 /* WRNormalizeCharRangeSetAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRNormalizeCharRangeSetAlgorithm.h; sourceTree = "<group>"; };
+		3AED23630983B53349C1F824 /* WRRegexLanguage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRegexLanguage.h; sourceTree = "<group>"; };
+		3AED26632B340FF8ECC2579C /* WRREState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRREState.m; sourceTree = "<group>"; };
+		3AED26B1FD66A163DFC11249 /* WRRegexScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRegexScanner.m; sourceTree = "<group>"; };
+		3AED26C8314B6082A3FA6456 /* WRREState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRREState.h; sourceTree = "<group>"; };
+		3AED2726AA0BA112884F5E8C /* WRRegexUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRegexUtils.h; sourceTree = "<group>"; };
+		3AED2869F272AF16C71F48FB /* WRREFABuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRREFABuilder.h; sourceTree = "<group>"; };
+		3AED28CE1EAEAEDF417598A9 /* WRCharRangeNormalizeMapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRCharRangeNormalizeMapper.h; sourceTree = "<group>"; };
 		3AED2943E95FD155BE2D9E89 /* WRRegexBasics */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = WRRegexBasics; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AED29ABF036AE935AD06218 /* WRRegexLanguage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRegexLanguage.m; sourceTree = "<group>"; };
 		3AED2A3F26B1B0C7C59CA56C /* WRCharRange.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRCharRange.m; sourceTree = "<group>"; };
+		3AED2C4BE24B395A4E62585A /* WRREFABuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRREFABuilder.m; sourceTree = "<group>"; };
+		3AED2C5E0E0407F8CCB4C3AD /* WRRegexUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRegexUtils.m; sourceTree = "<group>"; };
+		3AED2D2C332496F6E8D2F746 /* WRRegexScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRegexScanner.h; sourceTree = "<group>"; };
 		3AED2D6470E753773331EEA5 /* WRRegexLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRegexLib.h; sourceTree = "<group>"; };
 		3AED2E064CDD16F59181FBEF /* WRREAutoma.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRREAutoma.h; sourceTree = "<group>"; };
 		3AED2E959959EC3E9EA3A5B0 /* WRREDFAState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRREDFAState.h; sourceTree = "<group>"; };
-		3AED2F1441ADE5EB60DFE028 /* WRRENFAState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRENFAState.m; sourceTree = "<group>"; };
 		3AED2F627824EF16C4505BA6 /* WRRETransition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRETransition.m; sourceTree = "<group>"; };
 		3AED2F64023D74871E4D3F85 /* WRRETransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRETransition.h; sourceTree = "<group>"; };
-		3AED2F9A0E715A7D72F53670 /* WRNormalizeCharRangeSetAlgorithm.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRNormalizeCharRangeSetAlgorithm.m; sourceTree = "<group>"; };
+		3AED2F9A0E715A7D72F53670 /* WRCharRangeNormalizeMapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRCharRangeNormalizeMapper.m; sourceTree = "<group>"; };
 		3AED2FA81FB2D7DAB070A83B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A494416AE573867DD828B372 /* Pods-WRRegexBasics.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WRRegexBasics.release.xcconfig"; path = "Pods/Target Support Files/Pods-WRRegexBasics/Pods-WRRegexBasics.release.xcconfig"; sourceTree = "<group>"; };
 		D02CA13FB586BA4AE945C29C /* libPods-WRRegexBasics.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WRRegexBasics.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,6 +92,26 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		3AED26631EF744DDED9B3F6D /* Parsing */ = {
+			isa = PBXGroup;
+			children = (
+				3AED29ABF036AE935AD06218 /* WRRegexLanguage.m */,
+				3AED23630983B53349C1F824 /* WRRegexLanguage.h */,
+				3AED26B1FD66A163DFC11249 /* WRRegexScanner.m */,
+				3AED2D2C332496F6E8D2F746 /* WRRegexScanner.h */,
+			);
+			path = Parsing;
+			sourceTree = "<group>";
+		};
+		3AED28DA68B5181BA9C71CE2 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				3AED2C5E0E0407F8CCB4C3AD /* WRRegexUtils.m */,
+				3AED2726AA0BA112884F5E8C /* WRRegexUtils.h */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		3AED2925AA04C89D1A3DEC78 /* WRRegexBasics */ = {
 			isa = PBXGroup;
 			children = (
@@ -87,6 +119,8 @@
 				3AED2F0EC3FCFA106C33EE06 /* Model */,
 				3AED2B62923E035988F41C21 /* Algorithm */,
 				3AED2D6470E753773331EEA5 /* WRRegexLib.h */,
+				3AED26631EF744DDED9B3F6D /* Parsing */,
+				3AED28DA68B5181BA9C71CE2 /* Utils */,
 			);
 			path = WRRegexBasics;
 			sourceTree = "<group>";
@@ -94,8 +128,8 @@
 		3AED2B62923E035988F41C21 /* Algorithm */ = {
 			isa = PBXGroup;
 			children = (
-				3AED2F9A0E715A7D72F53670 /* WRNormalizeCharRangeSetAlgorithm.m */,
-				3AED28CE1EAEAEDF417598A9 /* WRNormalizeCharRangeSetAlgorithm.h */,
+				3AED2F9A0E715A7D72F53670 /* WRCharRangeNormalizeMapper.m */,
+				3AED28CE1EAEAEDF417598A9 /* WRCharRangeNormalizeMapper.h */,
 			);
 			path = Algorithm;
 			sourceTree = "<group>";
@@ -103,8 +137,6 @@
 		3AED2F0EC3FCFA106C33EE06 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				3AED2F1441ADE5EB60DFE028 /* WRRENFAState.m */,
-				3AED27A0FDB35FA34ECCD99A /* WRRENFAState.h */,
 				3AED20AAB1B3C61011662011 /* WRREDFAState.m */,
 				3AED2E959959EC3E9EA3A5B0 /* WRREDFAState.h */,
 				3AED2217C21A7B105B0D5A91 /* WRREAutoma.m */,
@@ -113,6 +145,10 @@
 				3AED2F64023D74871E4D3F85 /* WRRETransition.h */,
 				3AED2A3F26B1B0C7C59CA56C /* WRCharRange.m */,
 				3AED226FD7C2206B2D4B9AB2 /* WRCharRange.h */,
+				3AED26632B340FF8ECC2579C /* WRREState.m */,
+				3AED26C8314B6082A3FA6456 /* WRREState.h */,
+				3AED2C4BE24B395A4E62585A /* WRREFABuilder.m */,
+				3AED2869F272AF16C71F48FB /* WRREFABuilder.h */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -220,12 +256,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				3AED25FC088328EA1C322E6E /* main.m in Sources */,
-				3AED2D97859C033E1AF71336 /* WRRENFAState.m in Sources */,
 				3AED265D119A44C049350B39 /* WRREDFAState.m in Sources */,
 				3AED2F28919494FCE103666C /* WRREAutoma.m in Sources */,
 				3AED2A78AA0C99601F1D7383 /* WRRETransition.m in Sources */,
 				3AED270E9CE1B17171295A76 /* WRCharRange.m in Sources */,
-				3AED2CBA0CED415C11F65F8F /* WRNormalizeCharRangeSetAlgorithm.m in Sources */,
+				3AED2CBA0CED415C11F65F8F /* WRCharRangeNormalizeMapper.m in Sources */,
+				3AED2EE0F25C0492F3809717 /* WRREState.m in Sources */,
+				3AED2E092846A953B3327E54 /* WRREFABuilder.m in Sources */,
+				3AED2CAD60B0F22831D837F0 /* WRRegexLanguage.m in Sources */,
+				3AED27D388C1AD8BECA07108 /* WRRegexScanner.m in Sources */,
+				3AED2B917E635A89EECE8185 /* WRRegexUtils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

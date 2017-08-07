@@ -45,6 +45,19 @@ void testState() {
   [set addObject:state1];
   [set addObject:state2];
   assert(set.count == 1);
+
+  state1.stateId = 0;
+  state2.stateId = 131;
+  WRREState *state3 = [[WRREState alloc] initWithStateId:1];
+  WRREState *state4 = [[WRREState alloc] initWithStateId:0];
+
+  WRREDFAState *dfaState1 = [[WRREDFAState alloc] initWithSortedStates:@[state1,state2]];
+  WRREDFAState *dfaState2 = [[WRREDFAState alloc] initWithSortedStates:@[state3,state4]];
+
+  NSMutableSet <WRREDFAState *> *dfaSet = [NSMutableSet set];
+  [dfaSet addObject:dfaState1];
+  [dfaSet addObject:dfaState2];
+  ;
 }
 
 void testLanguage() {
@@ -257,7 +270,7 @@ void testFABuilder(){
   WRLR1Parser *parser = [[WRLR1Parser alloc] init];
   WRLanguage *language = [[WRRegexLanguage alloc] init];
   WRRegexScanner *scanner = [[WRRegexScanner alloc] init];
-  scanner.inputStr = @"a+";
+  scanner.inputStr = @"a([f].*)+b";
   parser.language = language;
   parser.scanner = scanner;
   [parser prepare];
@@ -289,7 +302,10 @@ void testFABuilder(){
   WRREFABuilder *builder = [[WRREFABuilder alloc]initWithCharRangeMapper:mapper
                                                                      ast:ast];
   WRREState *epsilonStart = builder.epsilonNFAStart;
-//  [builder epsilonNFA2NFA];
+  [builder epsilonNFA2NFA];
+  WRREState *NFAStart = builder.NFAStart;
+  [builder NFA2DFA];
+  WRREDFAState *DFAStart = builder.DFAStart;
   ;
   
 }
