@@ -26,7 +26,11 @@
 
 - (void)NFA2DFA;
 
+- (void)printNFA;
+
 - (WRREDFAState *)DFAStart;
+
+- (void)printDFA;
 
 - (void)visit:(WRAST *)ast
  withChildren:(NSArray<WRAST *> *)children;
