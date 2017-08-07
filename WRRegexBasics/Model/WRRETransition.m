@@ -5,8 +5,21 @@
  */
 
 #import "WRRETransition.h"
+#import "WRREState.h"
 
-@implementation WRRETransition {
-
+@implementation WRRETransition
+- (instancetype)initWithType:(WRRETransitionType)type
+                       index:(int)index
+                      source:(WRREState *)source
+                      target:(WRREState *)target {
+  if (self = [super init]) {
+    _type = type;
+    _index = index;
+    _source = source;
+    _target = target;
+    [_source.toTransitionList addObject:self];
+    [_target.fromTransitionList addObject:self];
+  }
+  return self;
 }
 @end
