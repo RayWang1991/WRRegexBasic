@@ -74,8 +74,8 @@
   return _NFAStart;
 }
 
-- (WRREDFAState *)DFAStart{
-  if(!_DFAStart){
+- (WRREDFAState *)DFAStart {
+  if (!_DFAStart) {
     [self NFA2DFA];
   }
   return _DFAStart;
@@ -286,7 +286,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
             [transitionDict setObject:array
                                forKey:@(transition.index)];
           } else {
-            if(![NFASet containsObject:transition.target]){
+            if (![NFASet containsObject:transition.target]) {
               [array addObject:transition.target];
               [NFASet addObject:transition.target];
             }
@@ -355,41 +355,40 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 #pragma mark -print
-- (void)printNFA{
-  
+- (void)printNFA {
+
 }
 
-- (void)printDFA{
+- (void)printDFA {
   // print all states and transitions
-  for(WRREDFAState *state in self.allDFAStates){
-    printf("DFASTATE:%d\n", (int)state.stateId);
-    for(WRRETransition *transition in state.toTransitionList){
+  for (WRREDFAState *state in self.allDFAStates) {
+    printf("DFASTATE:%d\n", (int) state.stateId);
+    for (WRRETransition *transition in state.toTransitionList) {
       NSString *content =
-      [NSString stringWithFormat:@"  --%d,%@--> %d\n",
-       transition.index,
-       self.mapper.normalizedRanges[transition.index],
-       (int)transition.target.stateId];
-      printf("%s",content.UTF8String);
+        [NSString stringWithFormat:@"  --%d,%@--> %d\n",
+                                   transition.index,
+                                   self.mapper.normalizedRanges[transition.index],
+                                   (int) transition.target.stateId];
+      printf("%s", content.UTF8String);
     }
   }
   printf("\n");
-  
+
   // transition table
   NSUInteger n = self.allDFAStates.count;
   NSUInteger m = self.mapper.normalizedRanges.count;
-  
+
   // header for normalized range indexex
-  printf("%4s"," ");
-  for(NSUInteger i = 0; i < m; i++){
-    printf("%4ld",(unsigned long)i);
+  printf("%4s", " ");
+  for (NSUInteger i = 0; i < m; i++) {
+    printf("%4ld", (unsigned long) i);
   }
   printf("\n");
-  
-  
-  for(NSUInteger i = 0; i < n; i++){
-    printf("%4ld",(unsigned long)i);
-    for(NSUInteger j = 0; j < m; j++){
-      printf("%4ld",(unsigned long)self->dfaTable[i][j]);
+
+  for (NSUInteger i = 0; i < n; i++) {
+    printf("%4ld", (unsigned long) i);
+    for (NSUInteger j = 0; j < m; j++) {
+      printf("%4ld", (long) self->dfaTable[i][j]);
     }
     printf("\n");
   }

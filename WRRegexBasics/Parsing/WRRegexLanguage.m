@@ -15,6 +15,9 @@
   if (self = [super
     initWithRuleStrings:@[
       @"S -> Frag",
+//      @"Expr -> Expr exOr SeqExpr | SeqExpr",
+//      @"SeqExpr -> SeqExpr exAnd UnitExpr | UnitExpr",
+//      @"UnitExpr -> exNot Frag | Frag",
       @"Frag -> Frag or Seq | Seq ",
       @"Seq -> Seq Unit | Unit ",
       @"Unit -> char | ( Frag ) | Unit PostOp ",

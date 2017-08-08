@@ -306,6 +306,7 @@ void testFABuilder(){
   WRREState *NFAStart = builder.NFAStart;
   [builder NFA2DFA];
   WRREDFAState *DFAStart = builder.DFAStart;
+  [builder printDFA];
   ;
   
 }
