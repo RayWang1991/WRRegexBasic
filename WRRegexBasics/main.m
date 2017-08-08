@@ -9,6 +9,8 @@
 #import "WRRegexLib.h"
 #import "WRREState.h"
 
+void testFileManager();
+
 void testState();
 
 void testLanguage();
@@ -29,13 +31,29 @@ int main(int argc, const char *argv[]) {
   @autoreleasepool {
 //    testCharRange();
 //    testCharRangeSetAlgorithm();
-//    testLanguage();
+    testLanguage();
 //    testScanner();
 //    testState ();
 //    testMapper();
-    testFABuilder();
+//    testFABuilder();
+//    testFileManager();
   }
   return 0;
+}
+
+void testFileManager() {
+  NSFileManager *manager = [NSFileManager defaultManager];
+  NSFileHandle *handle = [NSFileHandle fileHandleWithStandardInput];
+  NSData *data = nil;
+  printf("Please write your name:\n");
+  while(true){
+    if((data = handle.availableData)){
+      NSString *str = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+      if([str characterAtIndex:str.length - 1] == '\n'){
+        printf("Hello, %s",[str substringToIndex:str.length - 1].UTF8String);
+      }
+    }
+  }
 }
 
 void testState() {
@@ -64,7 +82,7 @@ void testLanguage() {
   WRLR1Parser *parser = [[WRLR1Parser alloc] init];
   WRWordScanner *scanner = [[WRWordScanner alloc] init];
   WRLanguage *language = [[WRRegexLanguage alloc] init];
-  scanner.inputStr = @"charList ( char or charList * )";
+  scanner.inputStr = @"char ( char or char * )";
   //  WRLanguage *language = [WRRELanguage CFGrammar7_19];
   //  scanner.inputStr = @"x";
   parser.language = language;
