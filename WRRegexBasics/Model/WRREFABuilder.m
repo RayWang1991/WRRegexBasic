@@ -321,6 +321,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   NSUInteger n = self.allDFAStates.count;
   NSUInteger m = self.mapper.normalizedRanges.count;
 
+  [self clearDFATalbe];
+  
   self->dfaTable = (int **) malloc(sizeof(int *) * n);
   for (NSUInteger i = 0; i < n; i++) {
     self->dfaTable[i] = (int *) malloc(sizeof(int) * m);
@@ -342,7 +344,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 }
 
-- (void)dealloc {
+- (void)clearDFATalbe{
   if (self.allDFAStates.count) {
     // free dfa table
     for (NSUInteger i = 0; i < self.allDFAStates.count; i++) {
@@ -350,6 +352,10 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     }
     free(self->dfaTable);
   }
+}
+
+- (void)dealloc {
+  [self clearDFATalbe];
 }
 
 - (void)DFACompress {
