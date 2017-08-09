@@ -21,7 +21,7 @@ typedef NS_ENUM(NSInteger, WRRERegexCarrierType) {
 // factory
 + (instancetype)noWayCarrier;
 + (instancetype)EpsilonCarrier;
-+ (instancetype)SingleCarrier:(WRCharRange *)charRange;
++ (instancetype)SingleCarrierWithCharRange:(WRCharRange *)charRange;
 + (instancetype)orCarrier;
 + (instancetype)orCarrierWithChildren:(NSArray <WRRERegexCarrier *> *)children;
 + (instancetype)concatenateCarrier;
@@ -46,6 +46,7 @@ typedef NS_ENUM(NSInteger, WRRERegexCarrierType) {
 
 @interface WRRERegexCarrierSingle : WRRERegexCarrier
 @property (nonatomic, strong, readwrite) WRCharRange *charRange;
+- (instancetype)initWithCharRange:(WRCharRange *)charRange;
 @end
 
 @interface WRRERegexCarrierOr : WRRERegexCarrier
@@ -62,4 +63,3 @@ typedef NS_ENUM(NSInteger, WRRERegexCarrierType) {
 @property (nonatomic, strong, readwrite) WRRERegexCarrier *child;
 - (instancetype)initWithChild:(WRRERegexCarrier *)child;
 @end
-
