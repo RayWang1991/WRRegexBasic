@@ -9,6 +9,8 @@
 #import "WRRegexLib.h"
 #import "WRREState.h"
 
+void testParsingBasicLib();
+
 void testFileManager();
 
 void testState();
@@ -31,14 +33,46 @@ int main(int argc, const char *argv[]) {
   @autoreleasepool {
 //    testCharRange();
 //    testCharRangeSetAlgorithm();
-    testLanguage();
+//    testLanguage();
 //    testScanner();
 //    testState ();
 //    testMapper();
-//    testFABuilder();
+    testFABuilder();
 //    testFileManager();
+//    testParsingBasicLib();
   }
   return 0;
+}
+
+void testParsingBasicLib(){
+  WREarleyParser *parser = [[WREarleyParser alloc] init];
+  WRWordScanner *scanner = [[WRWordScanner alloc] init];
+  //    scanner.inputStr = @"abbb";
+  //    WRLanguage *language = [WRLanguage CFGrammar_SPFER_3];
+  //  WRLanguage *language = [WRRELanguage CFGrammar_RE_Basic1];
+  //  WRLanguage *language = [WRRELanguage CFGrammar_EAC_3_4_RR];
+  //  scanner.inputStr = @"char ( char ? char or char char * ) or char";
+  //  scanner.inputStr = @"num + ( name ÷ ( name - num ) )";
+  WRLanguage *language = [WRLanguage CFGrammar7_19];
+  scanner.inputStr = @"x";
+  [scanner startScan];
+  parser.language = language;
+  parser.scanner = scanner;
+  [parser startParsing];
+  [parser constructSPPF];
+  [parser constructParseTree];
+  
+  printf("\nParse Tree:\n");
+  // parse tree
+  WRTreeHorizontalDashStylePrinter *hdPrinter = [[WRTreeHorizontalDashStylePrinter alloc] init];
+  [parser.parseTree accept:hdPrinter];
+  [hdPrinter print];
+  
+  // ast
+  WRAST *ast = [language astNodeForToken:parser.parseTree];
+  [hdPrinter reset];
+  [ast accept:hdPrinter];
+  [hdPrinter print];
 }
 
 void testFileManager() {
@@ -283,6 +317,8 @@ void examRangeContent(WRCharRange *range, WRChar start, WRChar end) {
   assert(range.start == start && range.end == end);
 }
 
+void examDFAMatch(NSString *regex, NSString *input, BOOL res, WRRegexScanner *scanner, WRLR1Parser *parser,WRLanguage *language);
+
 void testFABuilder(){
   
   WRLR1Parser *parser = [[WRLR1Parser alloc] init];
@@ -325,6 +361,33 @@ void testFABuilder(){
   [builder NFA2DFA];
   WRREDFAState *DFAStart = builder.DFAStart;
   [builder printDFA];
-  ;
   
+  examDFAMatch(@"a.*b", @"aasdfsadfasdfb", YES, scanner, parser, language);
+  examDFAMatch(@"a.*b", @"aasdfsadfasdf", NO, scanner, parser, language);
+  examDFAMatch(@"a[c-e]?b", @"aeb", YES, scanner, parser, language);
+  examDFAMatch(@"a[c-e]?b", @"ab", YES, scanner, parser, language);
+  examDFAMatch(@"a[c-e]?b", @"af", NO, scanner, parser, language);
+  examDFAMatch(@"(a[fh-p].*)+b?", @"aa", NO, scanner, parser, language);
+  examDFAMatch(@"(a[fh-p].*)+b?", @"afapakal", YES, scanner, parser, language);
+  examDFAMatch(@"\\d*", @"7676976", YES, scanner, parser, language);
+  examDFAMatch(@"\\w*", @"7676976hgjhg", YES, scanner, parser, language);
+  examDFAMatch(@"\\w+\\.[0-9a-z]+\\.(com|cn|edu)", @"www.123.com", YES, scanner, parser, language);
+}
+
+void examDFAMatch(NSString *regex, NSString *input, BOOL res, WRRegexScanner *scanner, WRLR1Parser *parser,WRLanguage *language){
+  scanner.inputStr = regex;
+  [parser startParsing];
+  WRAST *ast = [language astNodeForToken:parser.parseTree];
+  WRCharRangeNormalizeMapper *mapper = [[WRCharRangeNormalizeMapper alloc]initWithRanges:scanner.ranges];
+  
+  for (WRCharTerminal *charTerminal in scanner.charTerminals) {
+    charTerminal.rangeIndexes = [mapper decomposeRangeList:charTerminal.ranges];
+  };
+  
+  WRREFABuilder *builder = [[WRREFABuilder alloc]initWithCharRangeMapper:mapper
+                                                                     ast:ast];
+  [builder epsilonNFA2NFA];
+  [builder NFA2DFA];
+  [builder printDFA];
+  assert([builder matchWithString:input] == res);
 }
