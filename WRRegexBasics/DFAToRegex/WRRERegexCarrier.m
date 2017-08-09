@@ -6,6 +6,7 @@
 
 #import "WRRERegexCarrier.h"
 
+#pragma mark - superClass
 @implementation WRRERegexCarrier
 // factory
 + (instancetype)noWayCarrier{
@@ -50,7 +51,12 @@
   return nil;
 }
 
+- (void)accept:(WRVisitor *)visitor {
+  [visitor visit:self];
+}
 @end
+
+#pragma mark - subClasses
 
 @implementation WRRERegexCarrierNoWay
 - (instancetype)init {
@@ -70,6 +76,8 @@
 - (WRRERegexCarrier *)closure {
   return self;
 }
+
+// visitor
 
 @end
 
@@ -91,6 +99,8 @@
 - (WRRERegexCarrier *)closure {
   return self;
 }
+
+// visitor
 
 @end
 
@@ -133,6 +143,8 @@
   return [[WRRERegexCarrierClosure alloc] initWithChild:self];
 }
 
+// visitor
+
 @end
 
 @implementation WRRERegexCarrierOr
@@ -171,6 +183,17 @@
 }
 - (WRRERegexCarrier *)closure {
   return [[WRRERegexCarrierClosure alloc] initWithChild:self];
+}
+
+// visitor
+- (void)accept:(WRVisitor *)visitor {
+  if ([visitor isKindOfClass:[WRTreeVisitor class]]) {
+    WRTreeVisitor *treeVisitor = (WRTreeVisitor *) visitor;
+    [treeVisitor visit:self
+          withChildren:self.children];
+  } else {
+    [super accept:visitor];
+  }
 }
 
 @end
@@ -213,6 +236,18 @@
 - (WRRERegexCarrier *)closure {
   return [[WRRERegexCarrierClosure alloc] initWithChild:self];
 }
+
+// visitor
+- (void)accept:(WRVisitor *)visitor {
+  if ([visitor isKindOfClass:[WRTreeVisitor class]]) {
+    WRTreeVisitor *treeVisitor = (WRTreeVisitor *) visitor;
+    [treeVisitor visit:self
+          withChildren:self.children];
+  } else {
+    [super accept:visitor];
+  }
+}
+
 @end
 
 @implementation WRRERegexCarrierClosure
@@ -257,4 +292,14 @@
   return self;
 }
 
+// visitor
+- (void)accept:(WRVisitor *)visitor {
+  if ([visitor isKindOfClass:[WRTreeVisitor class]]) {
+    WRTreeVisitor *treeVisitor = (WRTreeVisitor *) visitor;
+    [treeVisitor visit:self
+          withChildren:@[self.child]];
+  } else {
+    [super accept:visitor];
+  }
+}
 @end
