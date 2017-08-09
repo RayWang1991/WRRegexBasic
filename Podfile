@@ -3,7 +3,7 @@
 source 'https://github.com/RayWang1991/WRParsingBasic'
 
 def wrRegexBasics_pods
-  pod 'WRParsingBasic', :path => ‘../../Parse/WRParsingComponent/WRParsingBasic'
+  pod 'WRParsingBasic', :path => ‘../../PARSER/WRParsingComponent/WRParsingBasic'
 end
 
 target 'WRRegexBasics' do

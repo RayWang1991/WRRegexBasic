@@ -1,1 +1,1 @@
-../../../../../../Parser/WRParsingComponent/WRParsingBasic/Classes/Token/WRTerminal.h
+../../../../../../PARSER/WRParsingComponent/WRParsingBasic/Classes/Token/WRTerminal.h

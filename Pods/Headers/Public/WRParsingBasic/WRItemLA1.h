@@ -1,1 +1,1 @@
-../../../../../../Parser/WRParsingComponent/WRParsingBasic/Classes/Rule/WRItemLA1.h
+../../../../../../PARSER/WRParsingComponent/WRParsingBasic/Classes/Rule/WRItemLA1.h
