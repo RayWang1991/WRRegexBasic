@@ -30,6 +30,8 @@
 
 - (WRREDFAState *)DFAStart;
 
+- (BOOL)matchWithString:(NSString *)input;
+
 - (void)printDFA;
 
 - (void)visit:(WRAST *)ast

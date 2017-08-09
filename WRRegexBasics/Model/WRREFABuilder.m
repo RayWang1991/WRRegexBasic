@@ -250,6 +250,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   NSMutableArray *allEpsilonNFAStates = self.allStates;
   [allEpsilonNFAStates removeAllObjects];
   self.allStates = availableStates;
+  
+  _NFAStart = self.epsilonNFAStart;
 }
 
 - (void)NFA2DFA {
@@ -260,7 +262,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   NSMutableArray <WRREDFAState *> *workList = [NSMutableArray array];
   NSMutableDictionary <NSNumber *, NSMutableArray <WRREState *> *> *transitionDict = [NSMutableDictionary dictionary];
 
-  _DFAStart = [[WRREDFAState alloc] initWithSortedStates:@[_NFAStart]];
+  _DFAStart = [[WRREDFAState alloc] initWithSortedStates:@[self.NFAStart]];
   [_allDFAStates addObject:_DFAStart];
   [recordSet addObject:_DFAStart];
   [workList addObject:_DFAStart];
@@ -352,6 +354,27 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 
 - (void)DFACompress {
 
+}
+
+- (BOOL)matchWithString:(NSString *)input {
+  NSInteger state = self.DFAStart.stateId;
+  NSUInteger n = self.allDFAStates.count;
+  for (NSUInteger i = 0; i < input.length; i++) {
+    WRChar c = (WRChar) [input characterAtIndex:i];
+    NSInteger cIndex = self.mapper->table[c];
+    if(cIndex<0){
+      // not in char ranges
+      return NO;
+    }
+    NSInteger next = self->dfaTable[state][cIndex];
+    if (next >= 0 && next < n) {
+      state = next;
+    } else{
+      // not in states
+      return NO;
+    }
+  }
+  return self.allDFAStates[state].finalId > 0;
 }
 
 #pragma mark -print
