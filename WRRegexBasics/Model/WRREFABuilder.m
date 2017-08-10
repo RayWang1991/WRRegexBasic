@@ -11,6 +11,9 @@
 #import "WRRegexLanguage.h"
 #import "WRREDFAState.h"
 
+#import "WRRERegexCarrier.h"
+#import "WRRegexWriter.h"
+
 @implementation WRExpression
 
 - (instancetype)initWithStart:(WRREState *)start
@@ -250,7 +253,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   NSMutableArray *allEpsilonNFAStates = self.allStates;
   [allEpsilonNFAStates removeAllObjects];
   self.allStates = availableStates;
-  
+
   _NFAStart = self.epsilonNFAStart;
 }
 
@@ -322,7 +325,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   NSUInteger m = self.mapper.normalizedRanges.count;
 
   [self clearDFATalbe];
-  
+
   self->dfaTable = (int **) malloc(sizeof(int *) * n);
   for (NSUInteger i = 0; i < n; i++) {
     self->dfaTable[i] = (int *) malloc(sizeof(int) * m);
@@ -344,7 +347,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 }
 
-- (void)clearDFATalbe{
+- (void)clearDFATalbe {
   if (self.allDFAStates.count) {
     // free dfa table
     for (NSUInteger i = 0; i < self.allDFAStates.count; i++) {
@@ -362,20 +365,102 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 
 }
 
+- (void)DFA2Regex {
+  assert(self.DFAStart.stateId == 0);
+  // 2 dim array
+  NSUInteger n = self.allDFAStates.count;
+  NSUInteger m = self.mapper.normalizedRanges.count;
+  NSMutableArray *finalStates = [NSMutableArray array];
+  NSMutableArray *finalStateIds = [NSMutableArray array];
+  for (WRREDFAState *state in self.allDFAStates) {
+    if (state.finalId > 0) {
+      [finalStates addObject:state];
+      [finalStateIds addObject:@(state.stateId)];
+    }
+  }
+
+  // array init
+  NSMutableArray <NSMutableArray <WRRERegexCarrier *> *> *dp1 = [NSMutableArray arrayWithCapacity:n];
+  NSMutableArray <NSMutableArray <WRRERegexCarrier *> *> *dp2 = [NSMutableArray arrayWithCapacity:n];
+  NSArray *dpArray = @[dp1, dp2];
+
+  // -1
+  for (NSUInteger i = 0; i < n; i++) {
+    [dp1 addObject:[NSMutableArray arrayWithCapacity:n]];
+    [dp2 addObject:[NSMutableArray arrayWithCapacity:n]];
+    for (NSUInteger j = 0; j < n; j++) {
+      WRRERegexCarrier *carrier = [WRRERegexCarrier noWayCarrier];
+      for (WRRETransition *transition in self.allDFAStates[i].toTransitionList) {
+        if (transition.target.stateId == j) {
+          WRRERegexCarrier *single =
+            [WRRERegexCarrier singleCarrierWithCharRange:self.mapper.normalizedRanges[transition.index]];
+          carrier = [carrier orWith:single];
+        }
+      }
+      if (i == j) {
+        carrier = [carrier orWith:[WRRERegexCarrier epsilonCarrier]];
+      }
+      [dp1.lastObject addObject:carrier];
+      [dp2.lastObject addObject:[NSNull null]]; // TODO
+    }
+  }
+
+  NSMutableArray <NSMutableArray <WRRERegexCarrier *> *> *last = dp2, *current = dp1, *temp;
+  // 0 - (n-2) //
+
+  for (NSUInteger k = 0; k < n - 1; k++) {
+    temp = last;
+    last = current;
+    current = temp;
+    WRRERegexCarrier *Rkk_Star = [last[k][k] closure];
+    for (NSUInteger i = 0; i < n; i++) {
+      WRRERegexCarrier *Rik_kk_Star = [last[i][k] concatenateWith:Rkk_Star];
+      for (NSUInteger j = 0; j < n; j++) {
+        WRRERegexCarrier *Rik_kk_Star_kj = [Rik_kk_Star concatenateWith:last[k][j]];
+        current[i][j] = [last[i][j] orWith:Rik_kk_Star_kj];
+      }
+    }
+  }
+
+  WRRERegexCarrier *result = nil;
+
+  temp = last;
+  last = current;
+  current = temp;
+  NSUInteger k = n - 1, i = 0;
+  WRRERegexCarrier *Rkk_Star = [last[k][k] closure];
+  WRRERegexCarrier *Rik_kk_Star = [last[i][k] concatenateWith:Rkk_Star];
+  for (NSNumber *number in finalStateIds) {
+    NSUInteger j = number.unsignedIntegerValue;
+    WRRERegexCarrier *Rik_kk_Star_kj = [Rik_kk_Star concatenateWith:last[k][j]];
+    current[i][j] = [last[i][j] orWith:Rik_kk_Star_kj];
+    if(result){
+      result = [result orWith:current[i][j]];
+    } else{
+      result = current[i][j];
+    }
+  }
+
+  // show result
+  ;
+}
+
+#pragma mark - run automa
+
 - (BOOL)matchWithString:(NSString *)input {
   NSInteger state = self.DFAStart.stateId;
   NSUInteger n = self.allDFAStates.count;
   for (NSUInteger i = 0; i < input.length; i++) {
     WRChar c = (WRChar) [input characterAtIndex:i];
     NSInteger cIndex = self.mapper->table[c];
-    if(cIndex<0){
+    if (cIndex < 0) {
       // not in char ranges
       return NO;
     }
     NSInteger next = self->dfaTable[state][cIndex];
     if (next >= 0 && next < n) {
       state = next;
-    } else{
+    } else {
       // not in states
       return NO;
     }
