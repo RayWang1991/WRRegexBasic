@@ -9,31 +9,31 @@
 #pragma mark - superClass
 @implementation WRRERegexCarrier
 // factory
-+ (instancetype)noWayCarrier{
-  return [[WRRERegexCarrierNoWay alloc]init];
++ (instancetype)noWayCarrier {
+  return [[WRRERegexCarrierNoWay alloc] init];
 }
-+ (instancetype)EpsilonCarrier{
-  return [[WRRERegexCarrierEpsilon alloc]init];
++ (instancetype)epsilonCarrier {
+  return [[WRRERegexCarrierEpsilon alloc] init];
 }
-+ (instancetype)SingleCarrierWithCharRange:(WRCharRange *)charRange{
++ (instancetype)singleCarrierWithCharRange:(WRCharRange *)charRange {
   return [[WRRERegexCarrierSingle alloc] initWithCharRange:charRange];
 }
-+ (instancetype)orCarrier{
-  return [[WRRERegexCarrierOr alloc]init];
++ (instancetype)orCarrier {
+  return [[WRRERegexCarrierOr alloc] init];
 }
-+ (instancetype)orCarrierWithChildren:(NSArray <WRRERegexCarrier *> *)children{
++ (instancetype)orCarrierWithChildren:(NSArray <WRRERegexCarrier *> *)children {
   return [[WRRERegexCarrierOr alloc] initWithChildren:children];
 }
-+ (instancetype)concatenateCarrier{
-  return [[WRRERegexCarrierConcatenate alloc]init];
++ (instancetype)concatenateCarrier {
+  return [[WRRERegexCarrierConcatenate alloc] init];
 }
-+ (instancetype)concatenateCarrierWithChildren:(NSArray <WRRERegexCarrier *> *)children{
++ (instancetype)concatenateCarrierWithChildren:(NSArray <WRRERegexCarrier *> *)children {
   return [[WRRERegexCarrierConcatenate alloc] initWithChildren:children];
 }
-+ (instancetype)closureCarrier{
-  return [[WRRERegexCarrierClosure alloc]init];
++ (instancetype)closureCarrier {
+  return [[WRRERegexCarrierClosure alloc] init];
 }
-+ (instancetype)closureCarrierWithChild:(WRRERegexCarrier *)child{
++ (instancetype)closureCarrierWithChild:(WRRERegexCarrier *)child {
   return [[WRRERegexCarrierClosure alloc] initWithChild:child];
 }
 
@@ -91,7 +91,27 @@
 
 // operator
 - (WRRERegexCarrier *)orWith:(WRRERegexCarrier *)other {
-  return other;
+  switch (other.type) {
+    case WRRERegexCarrierTypeNoWay :
+    case WRRERegexCarrierTypeEpsilon : {
+      return self;
+    }
+    case WRRERegexCarrierTypeOr: {
+      WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
+      if (!or.epsilonChild) {
+        [or.children insertObject:self
+                          atIndex:0];
+        or.epsilonChild = self;
+      }
+      return or;
+    }
+    default: {
+      // single, concatenate, closure
+      WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[self, other]];
+      or.epsilonChild = self;
+      return or;
+    }
+  }
 }
 - (WRRERegexCarrier *)concatenateWith:(WRRERegexCarrier *)other {
   return other;
@@ -120,6 +140,21 @@
 
 // operator
 - (WRRERegexCarrier *)orWith:(WRRERegexCarrier *)other {
+  switch (other.type) {
+    case WRRERegexCarrierTypeNoWay: {
+      return self;
+    }
+    case WRRERegexCarrierTypeEpsilon: {
+      WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[other, self]];
+      or.epsilonChild = other;
+      return or;
+    }
+    case WRRERegexCarrierTypeOr: {
+      WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
+      [or.children addObject:self];
+      return or;
+    }
+  }
   if (other.type == WRRERegexCarrierTypeOr) {
     WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
     [or.children addObject:self];
@@ -164,10 +199,24 @@
 
 // operator
 - (WRRERegexCarrier *)orWith:(WRRERegexCarrier *)other {
-  if (other.type == WRRERegexCarrierTypeOr) {
-    [self.children addObjectsFromArray:[(WRRERegexCarrierOr *) other children]];
-  } else {
-    [self.children addObject:other];
+  switch (other.type) {
+    case WRRERegexCarrierTypeNoWay:break;
+    case WRRERegexCarrierTypeEpsilon: {
+      if (!self.epsilonChild) {
+        self.epsilonChild = other;
+        [self.children insertObject:other
+                            atIndex:0];
+      }
+      break;
+    }
+    case WRRERegexCarrierTypeOr: {
+      [self.children addObjectsFromArray:[(WRRERegexCarrierOr *) other children]];
+      break;
+    }
+    default: {
+      [self.children addObject:other];
+      break;
+    }
   }
   return self;
 }
@@ -215,13 +264,23 @@
 
 // operator
 - (WRRERegexCarrier *)orWith:(WRRERegexCarrier *)other {
-  if (other.type == WRRERegexCarrierTypeOr) {
-    WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
-    [or.children addObject:self];
-    return or;
-  } else {
-    WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[self, other]];
-    return or;
+  switch (other.type) {
+    case WRRERegexCarrierTypeNoWay:return self;
+    case WRRERegexCarrierTypeEpsilon : {
+      // single, concatenate, closure
+      WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[other, self]];
+      or.epsilonChild = other;
+      return or;
+    }
+    case WRRERegexCarrierTypeOr: {
+      WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
+      [or.children addObject:self];
+      return or;
+    }
+    default: {
+      WRRERegexCarrierOr *or = [WRRERegexCarrier orCarrierWithChildren:@[self, other]];
+      return or;
+    }
   }
 }
 - (WRRERegexCarrier *)concatenateWith:(WRRERegexCarrier *)other {
@@ -267,13 +326,23 @@
 
 // operator
 - (WRRERegexCarrier *)orWith:(WRRERegexCarrier *)other {
-  if (other.type == WRRERegexCarrierTypeOr) {
-    WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
-    [or.children addObject:self];
-    return or;
-  } else {
-    WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[self, other]];
-    return or;
+  switch (other.type) {
+    case WRRERegexCarrierTypeNoWay:return self;
+    case WRRERegexCarrierTypeEpsilon : {
+      // single, concatenate, closure
+      WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[other, self]];
+      or.epsilonChild = other;
+      return or;
+    }
+    case WRRERegexCarrierTypeOr: {
+      WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
+      [or.children addObject:self];
+      return or;
+    }
+    default: {
+      WRRERegexCarrierOr *or = [WRRERegexCarrier orCarrierWithChildren:@[self, other]];
+      return or;
+    }
   }
 }
 
