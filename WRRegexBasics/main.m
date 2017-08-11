@@ -39,40 +39,8 @@ int main(int argc, const char *argv[]) {
 //    testMapper();
     testFABuilder();
 //    testFileManager();
-//    testParsingBasicLib();
   }
   return 0;
-}
-
-void testParsingBasicLib(){
-  WREarleyParser *parser = [[WREarleyParser alloc] init];
-  WRWordScanner *scanner = [[WRWordScanner alloc] init];
-  //    scanner.inputStr = @"abbb";
-  //    WRLanguage *language = [WRLanguage CFGrammar_SPFER_3];
-  //  WRLanguage *language = [WRRELanguage CFGrammar_RE_Basic1];
-  //  WRLanguage *language = [WRRELanguage CFGrammar_EAC_3_4_RR];
-  //  scanner.inputStr = @"char ( char ? char or char char * ) or char";
-  //  scanner.inputStr = @"num + ( name ÷ ( name - num ) )";
-  WRLanguage *language = [WRLanguage CFGrammar7_19];
-  scanner.inputStr = @"x";
-  [scanner startScan];
-  parser.language = language;
-  parser.scanner = scanner;
-  [parser startParsing];
-  [parser constructSPPF];
-  [parser constructParseTree];
-  
-  printf("\nParse Tree:\n");
-  // parse tree
-  WRTreeHorizontalDashStylePrinter *hdPrinter = [[WRTreeHorizontalDashStylePrinter alloc] init];
-  [parser.parseTree accept:hdPrinter];
-  [hdPrinter print];
-  
-  // ast
-  WRAST *ast = [language astNodeForToken:parser.parseTree];
-  [hdPrinter reset];
-  [ast accept:hdPrinter];
-  [hdPrinter print];
 }
 
 void testFileManager() {
@@ -372,6 +340,12 @@ void testFABuilder(){
   examDFAMatch(@"\\d*", @"7676976", YES, scanner, parser, language);
   examDFAMatch(@"\\w*", @"7676976hgjhg", YES, scanner, parser, language);
   examDFAMatch(@"\\w+\\.[0-9a-z]+\\.(com|cn|edu)", @"www.123.com", YES, scanner, parser, language);
+  
+  // **test
+  examDFAMatch(@"a***b", @"www.123.com", NO, scanner, parser, language);
+  examDFAMatch(@"a***b", @"aaaaa", NO, scanner, parser, language);
+  examDFAMatch(@"a***b", @"b", YES, scanner, parser, language);
+  examDFAMatch(@"a***b", @"aab", YES, scanner, parser, language);
 }
 
 void examDFAMatch(NSString *regex, NSString *input, BOOL res, WRRegexScanner *scanner, WRLR1Parser *parser,WRLanguage *language){
