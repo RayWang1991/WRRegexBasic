@@ -49,6 +49,9 @@ typedef NS_ENUM(NSInteger, WRRERegexCarrierType) {
 - (instancetype)initWithCharRange:(WRCharRange *)charRange;
 @end
 
+/**
+ * The epsilon child should be always the first child for find efficiency !
+ */
 @interface WRRERegexCarrierOr : WRRERegexCarrier
 @property (nonatomic, strong, readwrite) NSMutableArray < WRRERegexCarrier *> *children;
 @property (nonatomic, strong, readwrite) WRRERegexCarrierEpsilon *epsilonChild;
