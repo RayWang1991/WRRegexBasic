@@ -330,6 +330,7 @@ void testFABuilder(){
   WRREDFAState *DFAStart = builder.DFAStart;
   [builder printDFA];
   
+  // exam DFA match
   examDFAMatch(@"a.*b", @"aasdfsadfasdfb", YES, scanner, parser, language);
   examDFAMatch(@"a.*b", @"aasdfsadfasdf", NO, scanner, parser, language);
   examDFAMatch(@"a[c-e]?b", @"aeb", YES, scanner, parser, language);
@@ -346,6 +347,14 @@ void testFABuilder(){
   examDFAMatch(@"a***b", @"aaaaa", NO, scanner, parser, language);
   examDFAMatch(@"a***b", @"b", YES, scanner, parser, language);
   examDFAMatch(@"a***b", @"aab", YES, scanner, parser, language);
+  
+  // ++test
+  examDFAMatch(@"a++b", @"aab", YES, scanner, parser, language);
+  
+  
+  //
+  [builder DFA2Regex];
+  ;
 }
 
 void examDFAMatch(NSString *regex, NSString *input, BOOL res, WRRegexScanner *scanner, WRLR1Parser *parser,WRLanguage *language){
