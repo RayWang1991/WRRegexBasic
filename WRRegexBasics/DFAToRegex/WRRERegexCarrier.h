@@ -50,7 +50,7 @@ typedef NS_ENUM(NSInteger, WRRERegexCarrierType) {
 @end
 
 /**
- * The epsilon child should be always the first child for find efficiency !
+ * The epsilon child should be always the last child for find efficiency !
  */
 @interface WRRERegexCarrierOr : WRRERegexCarrier
 @property (nonatomic, strong, readwrite) NSMutableArray < WRRERegexCarrier *> *children;
