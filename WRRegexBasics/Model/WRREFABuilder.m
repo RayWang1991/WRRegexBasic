@@ -261,9 +261,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 //  _stateId = 0;
   _allDFAStates = [NSMutableArray array];
   NSMutableSet <WRREDFAState *> *recordSet = [NSMutableSet set];
-  NSMutableSet <WRREState *> *NFASet = [NSMutableSet set];
   NSMutableArray <WRREDFAState *> *workList = [NSMutableArray array];
-  NSMutableDictionary <NSNumber *, NSMutableArray <WRREState *> *> *transitionDict = [NSMutableDictionary dictionary];
+  NSMutableDictionary <NSNumber *, NSMutableSet <WRREState *> *> *transitionDict = [NSMutableDictionary dictionary];
 
   _DFAStart = [[WRREDFAState alloc] initWithSortedStates:@[self.NFAStart]];
   [_allDFAStates addObject:_DFAStart];
@@ -275,8 +274,6 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     [workList removeLastObject];
     [transitionDict removeAllObjects];
     for (WRREState *nfaState in todoState.sortedStates) {
-      // reset
-      [NFASet removeAllObjects];
       // dispose final id
       if (nfaState.finalId) {
         todoState.finalId = nfaState.finalId;
@@ -285,15 +282,14 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       for (WRRETransition *transition in nfaState.toTransitionList) {
         // TODO currently testing normal is redundant
         if (transition.type == WRLR0NFATransitionTypeNormal) {
-          NSMutableArray *array = transitionDict[@(transition.index)];
-          if (nil == array) {
-            array = [NSMutableArray arrayWithObject:transition.target];
-            [transitionDict setObject:array
+          NSMutableSet *set = transitionDict[@(transition.index)];
+          if (nil == set) {
+            set = [NSMutableSet setWithObject:transition.target];
+            [transitionDict setObject:set
                                forKey:@(transition.index)];
           } else {
-            if (![NFASet containsObject:transition.target]) {
-              [array addObject:transition.target];
-              [NFASet addObject:transition.target];
+            if (![set containsObject:transition.target]) {
+              [set addObject:transition.target];
             }
           }
         }
@@ -301,10 +297,12 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     }
     for (NSNumber *index in transitionDict.allKeys) {
       // notice that the char range is not copied here
-      NSMutableArray *array = transitionDict[index];
-      [array sortUsingComparator:^NSComparisonResult(WRREState *state1, WRREState *state2) {
+      NSMutableSet *set = transitionDict[index];
+      NSArray *array =
+      [set.allObjects sortedArrayUsingComparator:^NSComparisonResult(WRREState *state1, WRREState *state2) {
         return state1.stateId - state2.stateId;
       }];
+      
       WRREDFAState *state = [[WRREDFAState alloc] initWithSortedStates:array];
       WRREDFAState *recordState = [recordSet member:state];
       if (nil == recordState) {
@@ -348,7 +346,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 - (void)clearDFATalbe {
-  if (self.allDFAStates.count) {
+  if (self.allDFAStates.count && self->dfaTable) {
     // free dfa table
     for (NSUInteger i = 0; i < self.allDFAStates.count; i++) {
       free(self->dfaTable[i]);
@@ -422,6 +420,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     }
   }
 
+  // n -1
   WRRERegexCarrier *result = nil;
 
   temp = last;
@@ -442,6 +441,9 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 
   // show result
+  ;
+
+  // carrier to regex string
   ;
 }
 
