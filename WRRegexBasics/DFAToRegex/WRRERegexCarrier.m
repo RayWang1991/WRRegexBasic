@@ -265,6 +265,10 @@
   }
 }
 - (WRRERegexCarrier *)closure {
+  if(self.epsilonChild){
+    [self.children removeLastObject];
+    self.epsilonChild = nil;
+  }
   return [[WRRERegexCarrierClosure alloc] initWithChild:self];
 }
 
