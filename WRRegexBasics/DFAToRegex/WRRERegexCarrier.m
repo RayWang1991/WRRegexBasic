@@ -93,21 +93,20 @@
 - (WRRERegexCarrier *)orWith:(WRRERegexCarrier *)other {
   switch (other.type) {
     case WRRERegexCarrierTypeNoWay :
-    case WRRERegexCarrierTypeEpsilon : {
-      return self;
-    }
+    case WRRERegexCarrierTypeEpsilon :return self;
     case WRRERegexCarrierTypeOr: {
       WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
       if (!or.epsilonChild) {
-        [or.children insertObject:self
-                          atIndex:0];
+        [or.children addObject:self];
         or.epsilonChild = self;
       }
       return or;
     }
+    case WRRERegexCarrierTypeClosure:return other;
+
     default: {
       // single, concatenate, closure
-      WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[self, other]];
+      WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[other, self]];
       or.epsilonChild = self;
       return or;
     }
@@ -165,13 +164,49 @@
   }
 }
 - (WRRERegexCarrier *)concatenateWith:(WRRERegexCarrier *)other {
-  if (other.type == WRRERegexCarrierTypeConcatenate) {
-    WRRERegexCarrierConcatenate *cat = (WRRERegexCarrierConcatenate *) other;
-    [cat.children addObject:self];
-    return cat;
-  } else {
-    WRRERegexCarrierConcatenate *cat = [[WRRERegexCarrierConcatenate alloc] initWithChildren:@[self, other]];
-    return cat;
+  switch (other.type) {
+    case WRRERegexCarrierTypeNoWay:return other;
+    case WRRERegexCarrierTypeEpsilon:return self;
+    case WRRERegexCarrierTypeConcatenate : {
+      WRRERegexCarrierConcatenate *cat = (WRRERegexCarrierConcatenate *) other;
+      [cat.children insertObject:self
+                         atIndex:0];
+      return cat;
+    }
+    case WRRERegexCarrierTypeOr: {
+      WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
+      if (or.epsilonChild) {
+        if (or.children.count == 2) {
+          // other | epsilon
+          WRRERegexCarrier *first = or.children.firstObject;
+          if (first.type == WRRERegexCarrierTypeConcatenate) {
+            [((WRRERegexCarrierConcatenate *) first).children insertObject:self
+                                                                   atIndex:0];
+          } else {
+            [or.children replaceObjectAtIndex:0
+                                   withObject:[WRRERegexCarrier concatenateCarrierWithChildren:@[self, first]]];
+          }
+          [or.children replaceObjectAtIndex:1
+                                 withObject:self];
+          or.epsilonChild = nil;
+          return or;
+        } else {
+          // other1 | other2... | epsilon
+          [or.children removeLastObject];
+          or.epsilonChild = nil;
+          WRRERegexCarrier *superOr =
+            [WRRERegexCarrier orCarrierWithChildren:
+              @[
+                [WRRERegexCarrier concatenateCarrierWithChildren:@[self, or]],
+                self,
+              ]];
+          return superOr;
+        }
+      } else {
+        return [WRRERegexCarrier concatenateCarrierWithChildren:@[self, other]];
+      }
+    }
+    default:return [WRRERegexCarrier concatenateCarrierWithChildren:@[self, other]];
   }
 }
 - (WRRERegexCarrier *)closure {
@@ -204,8 +239,7 @@
     case WRRERegexCarrierTypeEpsilon: {
       if (!self.epsilonChild) {
         self.epsilonChild = other;
-        [self.children insertObject:other
-                            atIndex:0];
+        [self.children addObject:other];
       }
       break;
     }
@@ -268,7 +302,7 @@
     case WRRERegexCarrierTypeNoWay:return self;
     case WRRERegexCarrierTypeEpsilon : {
       // single, concatenate, closure
-      WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[other, self]];
+      WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[self, other]];
       or.epsilonChild = other;
       return or;
     }
@@ -284,13 +318,57 @@
   }
 }
 - (WRRERegexCarrier *)concatenateWith:(WRRERegexCarrier *)other {
-  if (other.type == WRRERegexCarrierTypeConcatenate) {
-    WRRERegexCarrierConcatenate *cat = (WRRERegexCarrierConcatenate *) other;
-    [self.children addObjectsFromArray:cat.children];;
-  } else {
-    [self.children addObject:other];
+  switch (other.type) {
+    case WRRERegexCarrierTypeNoWay:return other;
+    case WRRERegexCarrierTypeEpsilon:return self;
+    case WRRERegexCarrierTypeConcatenate : {
+      WRRERegexCarrierConcatenate *cat = (WRRERegexCarrierConcatenate *) other;
+      [self.children addObjectsFromArray:cat.children];
+      return self;
+    }
+    case WRRERegexCarrierTypeOr: {
+      WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
+      if (or.epsilonChild) {
+        if (or.children.count == 2) {
+          // other | epsilon
+          WRRERegexCarrier *first = or.children.firstObject;
+          NSMutableArray *array = self.children.mutableCopy;
+          if (first.type == WRRERegexCarrierTypeConcatenate) {
+            [array addObjectsFromArray:((WRRERegexCarrierConcatenate *) first).children];
+          } else {
+            [array addObject:first];
+          }
+          [or.children replaceObjectAtIndex:0
+                                 withObject:[WRRERegexCarrier concatenateCarrierWithChildren:array]];
+          [or.children replaceObjectAtIndex:1
+                                 withObject:self];
+          or.epsilonChild = nil;
+          return or;
+        } else {
+          // other1 | other2... | epsilon
+          [or.children removeLastObject];
+          or.epsilonChild = nil;
+          NSMutableArray *array = self.children.mutableCopy;
+          [array addObject:or];
+
+          WRRERegexCarrier *superOr =
+            [WRRERegexCarrier orCarrierWithChildren:
+              @[
+                [WRRERegexCarrier concatenateCarrierWithChildren:array],
+                self,
+              ]];
+          return superOr;
+        }
+      } else {
+        [self.children addObject:other];
+        return self;
+      }
+    }
+    default: {
+      [self.children addObject:other];
+      return self;
+    }
   }
-  return self;
 }
 - (WRRERegexCarrier *)closure {
   return [[WRRERegexCarrierClosure alloc] initWithChild:self];
@@ -327,13 +405,8 @@
 // operator
 - (WRRERegexCarrier *)orWith:(WRRERegexCarrier *)other {
   switch (other.type) {
-    case WRRERegexCarrierTypeNoWay:return self;
-    case WRRERegexCarrierTypeEpsilon : {
-      // single, concatenate, closure
-      WRRERegexCarrierOr *or = [[WRRERegexCarrierOr alloc] initWithChildren:@[other, self]];
-      or.epsilonChild = other;
-      return or;
-    }
+    case WRRERegexCarrierTypeNoWay:
+    case WRRERegexCarrierTypeEpsilon : return self;
     case WRRERegexCarrierTypeOr: {
       WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
       [or.children addObject:self];
@@ -347,13 +420,50 @@
 }
 
 - (WRRERegexCarrier *)concatenateWith:(WRRERegexCarrier *)other {
-  if (other.type == WRRERegexCarrierTypeConcatenate) {
-    WRRERegexCarrierConcatenate *cat = (WRRERegexCarrierConcatenate *) other;
-    [cat.children addObject:self];
-    return cat;
-  } else {
-    WRRERegexCarrierConcatenate *cat = [[WRRERegexCarrierConcatenate alloc] initWithChildren:@[self, other]];
-    return cat;
+  // same with single
+  switch (other.type) {
+    case WRRERegexCarrierTypeNoWay:return other;
+    case WRRERegexCarrierTypeEpsilon:return self;
+    case WRRERegexCarrierTypeConcatenate : {
+      WRRERegexCarrierConcatenate *cat = (WRRERegexCarrierConcatenate *) other;
+      [cat.children insertObject:self
+                         atIndex:0];
+      return cat;
+    }
+    case WRRERegexCarrierTypeOr: {
+      WRRERegexCarrierOr *or = (WRRERegexCarrierOr *) other;
+      if (or.epsilonChild) {
+        if (or.children.count == 2) {
+          // other | epsilon
+          WRRERegexCarrier *first = or.children.firstObject;
+          if (first.type == WRRERegexCarrierTypeConcatenate) {
+            [((WRRERegexCarrierConcatenate *) first).children insertObject:self
+                                                                   atIndex:0];
+          } else {
+            [or.children replaceObjectAtIndex:0
+                                   withObject:[WRRERegexCarrier concatenateCarrierWithChildren:@[self, first]]];
+          }
+          [or.children replaceObjectAtIndex:1
+                                 withObject:self];
+          or.epsilonChild = nil;
+          return or;
+        } else {
+          // other1 | other2... | epsilon
+          [or.children removeLastObject];
+          or.epsilonChild = nil;
+          WRRERegexCarrier *superOr =
+            [WRRERegexCarrier orCarrierWithChildren:
+              @[
+                [WRRERegexCarrier concatenateCarrierWithChildren:@[self, or]],
+                self,
+              ]];
+          return superOr;
+        }
+      } else {
+        return [WRRERegexCarrier concatenateCarrierWithChildren:@[self, other]];
+      }
+    }
+    default:return [WRRERegexCarrier concatenateCarrierWithChildren:@[self, other]];
   }
 }
 
