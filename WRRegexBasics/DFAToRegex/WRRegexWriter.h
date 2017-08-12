@@ -9,6 +9,8 @@
 
 @class WRRERegexCarrier;
 @interface WRRegexWriter : WRTreeVisitor
+- (void)reset;
 - (void)visit:(WRRERegexCarrier *)carrier
  withChildren:(NSArray<WRRERegexCarrier *> *)children;
+- (void)print;
 @end
