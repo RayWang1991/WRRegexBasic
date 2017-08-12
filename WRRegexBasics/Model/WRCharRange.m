@@ -36,8 +36,15 @@
   return [object isKindOfClass:[WRCharRange class]] && self.hash == [object hash];
 }
 
-- (NSString *)description{
-  return [NSString stringWithFormat:@"[%c,%c]",self.start,self.end];
+- (NSString *)description {
+  if (self.start == self.end) {
+    return [NSString stringWithFormat:@"%c",
+                                      self.start];
+  } else {
+    return [NSString stringWithFormat:@"[%c,%c]",
+                                      self.start,
+                                      self.end];
+  }
 }
 
 #pragma mark -function
