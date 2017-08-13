@@ -283,9 +283,9 @@
   switch (other.type) {
     case WRRERegexCarrierTypeNoWay:break;
     case WRRERegexCarrierTypeEpsilon: {
-      if (!self.epsilonChild) {
+      if (!or.epsilonChild) {
         or.epsilonChild = other;
-        [self.children addObject:other];
+        [or.children addObject:other];
       }
       break;
     }
