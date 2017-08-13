@@ -28,3 +28,7 @@
 //Utils
 #import "WRRegexUtils.h"
 
+// DFA2Regex
+#import "WRRERegexCarrier.h"
+#import "WRRegexWriter.h"
+
