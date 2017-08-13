@@ -44,7 +44,6 @@ typedef NS_ENUM(NSInteger, WRRERegexCarrierType) {
 - (instancetype)copy;
 - (void)print;
 
-
 // visitor
 - (void)accept:(WRVisitor *)visitor;
 @end
