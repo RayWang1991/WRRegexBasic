@@ -57,6 +57,7 @@
         [child accept:self];
       }
       [_result appendString:@")"];
+      break;
     }
     case WRRERegexCarrierTypeOr: {
       WRRERegexCarrierOr *or = carrier;
@@ -71,6 +72,7 @@
         [child accept:self];
       }
       [_result appendString:@")"];
+      break;
     }
     default:break;
   }
