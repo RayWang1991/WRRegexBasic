@@ -41,7 +41,7 @@
     return [NSString stringWithFormat:@"%c",
                                       self.start];
   } else {
-    return [NSString stringWithFormat:@"[%c,%c]",
+    return [NSString stringWithFormat:@"[%c-%c]",
                                       self.start,
                                       self.end];
   }
