@@ -7,9 +7,15 @@
 #import <Foundation/Foundation.h>
 #import "WRParsingBasicLib.h"
 @class WRCharRange;
+@class WRRERegexCarrierClosure;
+@class WRRERegexCarrierConcatenate;
+@class WRRERegexCarrierOr;
+@class WRRERegexCarrierSingle;
+@class WRRERegexCarrierEpsilon;
+@class WRRERegexCarrierNoWay;
 
 typedef NS_ENUM(NSInteger, WRRERegexCarrierType) {
-  WRRERegexCarrierTypeNoWay,
+  WRRERegexCarrierTypeNoWay = 0,
   WRRERegexCarrierTypeEpsilon,
   WRRERegexCarrierTypeSingle,
   WRRERegexCarrierTypeOr,
@@ -19,20 +25,25 @@ typedef NS_ENUM(NSInteger, WRRERegexCarrierType) {
 @interface WRRERegexCarrier : NSObject<WRVisiteeProtocol>
 @property (nonatomic, assign, readwrite) WRRERegexCarrierType type;
 // factory
-+ (instancetype)noWayCarrier;
-+ (instancetype)epsilonCarrier;
-+ (instancetype)singleCarrierWithCharRange:(WRCharRange *)charRange;
-+ (instancetype)orCarrier;
-+ (instancetype)orCarrierWithChildren:(NSArray <WRRERegexCarrier *> *)children;
-+ (instancetype)concatenateCarrier;
-+ (instancetype)concatenateCarrierWithChildren:(NSArray <WRRERegexCarrier *> *)children;
-+ (instancetype)closureCarrier;
-+ (instancetype)closureCarrierWithChild:(WRRERegexCarrier *)child;
++ (WRRERegexCarrierNoWay *)noWayCarrier;
++ (WRRERegexCarrierEpsilon *)epsilonCarrier;
++ (WRRERegexCarrierSingle *)singleCarrierWithCharRange:(WRCharRange *)charRange;
++ (WRRERegexCarrierOr *)orCarrier;
++ (WRRERegexCarrierOr *)orCarrierWithChildren:(NSArray <WRRERegexCarrier *> *)children;
++ (WRRERegexCarrierConcatenate *)concatenateCarrier;
++ (WRRERegexCarrierConcatenate *)concatenateCarrierWithChildren:(NSArray <WRRERegexCarrier *> *)children;
++ (WRRERegexCarrierClosure *)closureCarrier;
++ (WRRERegexCarrierClosure *)closureCarrierWithChild:(WRRERegexCarrier *)child;
 
 // operator
-- (instancetype)orWith:(WRRERegexCarrier *)other;
-- (instancetype)concatenateWith:(WRRERegexCarrier *)other;
-- (instancetype)closure;
+- (WRRERegexCarrier *)orWith:(WRRERegexCarrier *)other;
+- (WRRERegexCarrier *)concatenateWith:(WRRERegexCarrier *)other;
+- (WRRERegexCarrier *)closure;
+
+// function
+- (instancetype)copy;
+- (void)print;
+
 
 // visitor
 - (void)accept:(WRVisitor *)visitor;
