@@ -196,6 +196,9 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       for (WRRETransition *transition in state.fromTransitionList) {
         if (transition.type != WRRETransitionTypeEpsilon) {
           [availableStates addObject:state];
+          [state.fromTransitionList removeAllObjects];
+          // remove the from-list of all available states, in order to remap them later
+          // this will not dealloc the corresponding transitions due to they are held by the to-lists
           break;
         }
       }
@@ -238,14 +241,13 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     }
 
     // ########
-    state.finalId = finialId; // should be evaluated
+    state.finalId = finialId; // should be evaluated, attention !!!
     // ########
 
     // add available transitions to the valid state
     [state.toTransitionList removeAllObjects];
     for (WRRETransition *transition in availableTransitions) {
-      transition.source = state;
-      [state.toTransitionList addObject:transition];
+      newTransition(WRRETransitionTypeNormal, transition.index, state, transition.target);
     }
     [availableTransitions removeAllObjects];
     [epsilonSet removeAllObjects];
@@ -257,8 +259,15 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   _NFAStart = self.epsilonNFAStart;
 }
 
+#pragma mark NFA to DFA
+
 - (void)NFA2DFA {
-//  _stateId = 0;
+  [self NFA2DFA_no_compress];
+//  [self NFA2DFA_compress];
+}
+
+- (void)NFA2DFA_no_compress {
+  // Do not compress the DFA states
   _allDFAStates = [NSMutableArray array];
   NSMutableSet <WRREDFAState *> *recordSet = [NSMutableSet set];
   NSMutableArray <WRREDFAState *> *workList = [NSMutableArray array];
@@ -299,10 +308,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       // notice that the char range is not copied here
       NSMutableSet *set = transitionDict[index];
       NSArray *array =
-      [set.allObjects sortedArrayUsingComparator:^NSComparisonResult(WRREState *state1, WRREState *state2) {
-        return state1.stateId - state2.stateId;
-      }];
-      
+        [set.allObjects sortedArrayUsingComparator:[WRREFABuilder stateComparator]];
+
       WRREDFAState *state = [[WRREDFAState alloc] initWithSortedStates:array];
       WRREDFAState *recordState = [recordSet member:state];
       if (nil == recordState) {
@@ -345,6 +352,178 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 }
 
+//TODO
+// failed due to from list is not the right one
+- (void)NFA2DFA_compress {
+  // reachable( subset( reverse( reachable( subset( reverse( nfa)))))
+  // Brzozowski's Algorithm
+
+  _allDFAStates = [NSMutableArray array];
+  NSMutableSet <WRREDFAState *> *recordSet = [NSMutableSet set];
+  NSMutableArray <WRREDFAState *> *workList = [NSMutableArray array];
+  NSMutableDictionary <NSNumber *, NSMutableSet <WRREState *> *> *transitionDict = [NSMutableDictionary dictionary];
+
+  NSMutableArray <WRREDFAState *> *reverseDFAStates = [NSMutableArray array];
+
+  // run subset in reverse order
+  // here we use final states as the start
+  NSMutableArray *startArray = [NSMutableArray array];
+  NSUInteger fa = 0;
+  for (WRREState *state in self.allStates) {
+    if (state.finalId) {
+      [startArray addObject:state];
+      fa = state.finalId;
+    }
+  }
+
+  [startArray sortUsingComparator:[WRREFABuilder stateComparator]];
+  WRREDFAState *reverseStart = [[WRREDFAState alloc] initWithSortedStates:startArray];
+  reverseStart.finalId = fa;
+  [reverseDFAStates addObject:reverseStart];
+  [recordSet addObject:reverseStart];
+  [workList addObject:reverseStart];
+
+  // the real start state must be itself
+  while (workList.count) {
+    WRREDFAState *todoState = workList.lastObject;
+    [workList removeLastObject];
+    [transitionDict removeAllObjects];
+    for (WRREState *nfaState in todoState.sortedStates) {
+      // dispose final id
+      for (WRRETransition *transition in nfaState.fromTransitionList) {
+        if (transition.type == WRLR0NFATransitionTypeNormal) {
+          NSMutableSet *set = transitionDict[@(transition.index)];
+          if (nil == set) {
+            set = [NSMutableSet setWithObject:transition.source];
+            [transitionDict setObject:set
+                               forKey:@(transition.index)];
+          } else {
+            if (![set containsObject:transition.source]) {
+              [set addObject:transition.source];
+            }
+          }
+        }
+      }
+    }
+
+    for (NSNumber *index in transitionDict.allKeys) {
+      // notice that the char range is not copied here
+      NSMutableSet *set = transitionDict[index];
+      NSArray *array =
+        [set.allObjects sortedArrayUsingComparator:[WRREFABuilder stateComparator]];
+
+      WRREDFAState *state = [[WRREDFAState alloc] initWithSortedStates:array];
+      WRREDFAState *recordState = [recordSet member:state];
+      if (nil == recordState) {
+        recordState = state;
+        [recordSet addObject:recordState];
+        [reverseDFAStates addObject:recordState];
+        [workList addObject:recordState];
+      }
+      newTransition(WRRETransitionTypeNormal, index.unsignedCharValue, recordState, todoState);
+    }
+  }
+
+  // find the DFA start first, then trim
+  WRREDFAState *dfaStart = [[WRREDFAState alloc] initWithSortedStates:@[self.NFAStart]];
+  dfaStart = [recordSet member:dfaStart];
+  assert(dfaStart);
+
+  NSUInteger reverseId = 0;
+  for (WRREDFAState *state in reverseDFAStates) {
+    [state trimWithStateId:reverseId++];
+  }
+
+  reverseDFAStates = nil;
+
+  // run subset in normal order
+  [recordSet removeAllObjects];
+  [workList removeAllObjects];
+
+  _DFAStart = [[WRREDFAState alloc] initWithSortedStates:@[dfaStart]];
+  [_allDFAStates addObject:_DFAStart];
+  [recordSet addObject:_DFAStart];
+  [workList addObject:_DFAStart];
+
+  while (workList.count) {
+    WRREDFAState *todoState = workList.lastObject;
+    [workList removeLastObject];
+    [transitionDict removeAllObjects];
+    for (WRREState *nfaState in todoState.sortedStates) {
+      // construct transition table dict
+      for (WRRETransition *transition in nfaState.toTransitionList) {
+        // TODO currently testing normal is redundant
+        if (transition.type == WRLR0NFATransitionTypeNormal) {
+          NSMutableSet *set = transitionDict[@(transition.index)];
+          if (nil == set) {
+            set = [NSMutableSet setWithObject:transition.target];
+            [transitionDict setObject:set
+                               forKey:@(transition.index)];
+          } else {
+            if (![set containsObject:transition.target]) {
+              [set addObject:transition.target];
+            }
+          }
+        }
+      }
+    }
+    for (NSNumber *index in transitionDict.allKeys) {
+      // notice that the char range is not copied here
+      NSMutableSet *set = transitionDict[index];
+      NSArray *array =
+        [set.allObjects sortedArrayUsingComparator:[WRREFABuilder stateComparator]];
+
+      WRREDFAState *state = [[WRREDFAState alloc] initWithSortedStates:array];
+      WRREDFAState *recordState = [recordSet member:state];
+      if (nil == recordState) {
+        recordState = state;
+        [recordSet addObject:recordState];
+        [_allDFAStates addObject:recordState];
+        [workList addObject:recordState];
+      }
+      newTransition(WRRETransitionTypeNormal, index.unsignedCharValue, todoState, recordState);
+    }
+  }
+
+  // label the final state
+  WRREDFAState *finalState = [[WRREDFAState alloc] initWithSortedStates:@[reverseStart]];
+  finalState = [recordSet member:finalState];
+  assert(finalState);
+  finalState.finalId = reverseStart.finalId;
+
+  // post dispose
+  NSUInteger n = self.allDFAStates.count;
+  NSUInteger m = self.mapper.normalizedRanges.count;
+
+  [self clearDFATalbe];
+
+  self->dfaTable = (int **) malloc(sizeof(int *) * n);
+  for (NSUInteger i = 0; i < n; i++) {
+    self->dfaTable[i] = (int *) malloc(sizeof(int) * m);
+    memset(self->dfaTable[i], -1, sizeof(int) * m);
+  }
+
+  _stateId = 0;
+  for (WRREDFAState *state in self.allDFAStates) {
+    [state trimWithStateId:_stateId++];
+  }
+  NSUInteger i = 0;
+  for (WRREDFAState *state in self.allDFAStates) {
+    for (WRRETransition *transition in state.toTransitionList) {
+      assert(transition.index < m);
+      // i < n
+      self->dfaTable[i][transition.index] = (int) transition.target.stateId;
+    }
+    i++;
+  }
+}
+
++ (NSComparator)stateComparator {
+  return ^NSComparisonResult(WRREState *state1, WRREState *state2) {
+    return state1.stateId - state2.stateId;
+  };
+}
+
 - (void)clearDFATalbe {
   if (self.allDFAStates.count && self->dfaTable) {
     // free dfa table
@@ -364,7 +543,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 - (void)DFA2Regex {
-  assert(self.DFAStart.stateId == 0);
+
   // 2 dim array
   NSUInteger n = self.allDFAStates.count;
   NSUInteger m = self.mapper.normalizedRanges.count;
@@ -392,7 +571,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
         if (transition.target.stateId == j) {
           WRRERegexCarrier *single =
             [WRRERegexCarrier singleCarrierWithCharRange:self.mapper.normalizedRanges[transition.index]];
-          carrier = [carrier orWith:single];
+          carrier = [carrier orWith:single];;
         }
       }
       if (i == j) {
@@ -426,25 +605,45 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   temp = last;
   last = current;
   current = temp;
-  NSUInteger k = n - 1, i = 0;
+  NSUInteger k = n - 1, i = self.DFAStart.stateId;
   WRRERegexCarrier *Rkk_Star = [last[k][k] closure];
   WRRERegexCarrier *Rik_kk_Star = [last[i][k] concatenateWith:Rkk_Star];
   for (NSNumber *number in finalStateIds) {
     NSUInteger j = number.unsignedIntegerValue;
     WRRERegexCarrier *Rik_kk_Star_kj = [Rik_kk_Star concatenateWith:last[k][j]];
     current[i][j] = [last[i][j] orWith:Rik_kk_Star_kj];
-    if(result){
+    if (result) {
       result = [result orWith:current[i][j]];
-    } else{
+    } else {
       result = current[i][j];
     }
   }
 
   // show result
-  ;
-
+  [self printCarrier:result];
   // carrier to regex string
   ;
+}
+
+- (void)printCarrier:(WRRERegexCarrier *)carrier {
+  WRRegexWriter *writer = [[WRRegexWriter alloc] init];
+  [carrier accept:writer];
+  [writer print];
+}
+
+- (void)printR:(NSArray <NSArray <WRRERegexCarrier *> *> *)rArray {
+  NSUInteger i = 0, j = 0;
+  for (NSArray *array in rArray) {
+    printf("%lu:", i);
+    j = 0;
+    for (WRRERegexCarrier *carrier in array) {
+      printf("%lu.", j);
+      [self printCarrier:carrier];
+      j++;
+    }
+    printf("\n");
+    i++;
+  }
 }
 
 #pragma mark - run automa
