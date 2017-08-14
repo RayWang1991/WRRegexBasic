@@ -17,6 +17,8 @@
 
 - (instancetype)initWithCharRangeMapper:(WRCharRangeNormalizeMapper *)mapper
                                     ast:(WRAST *)ast;
+- (void)visit:(WRAST *)ast
+ withChildren:(NSArray<WRAST *> *)children;
 
 - (WRREState *)epsilonNFAStart;
 
@@ -26,7 +28,7 @@
 
 - (void)NFA2DFA;
 
-- (void)printNFA;
+- (void)printNFA; // TODO
 
 - (WRREDFAState *)DFAStart;
 
@@ -34,8 +36,7 @@
 
 - (void)printDFA;
 
-- (void)visit:(WRAST *)ast
- withChildren:(NSArray<WRAST *> *)children;
+- (void)DFA2Regex;
 
 @end
 

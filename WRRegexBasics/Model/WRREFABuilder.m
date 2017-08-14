@@ -262,8 +262,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 #pragma mark NFA to DFA
 
 - (void)NFA2DFA {
-  [self NFA2DFA_no_compress];
-//  [self NFA2DFA_compress];
+//  [self NFA2DFA_no_compress];
+  [self NFA2DFA_compress];
 }
 
 - (void)NFA2DFA_no_compress {
@@ -324,7 +324,6 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 
   // post dispose
   // malloc two-dim array
-  // TODO
 
   NSUInteger n = self.allDFAStates.count;
   NSUInteger m = self.mapper.normalizedRanges.count;
@@ -352,8 +351,6 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 }
 
-//TODO
-// failed due to from list is not the right one
 - (void)NFA2DFA_compress {
   // reachable( subset( reverse( reachable( subset( reverse( nfa)))))
   // Brzozowski's Algorithm
@@ -383,13 +380,17 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   [recordSet addObject:reverseStart];
   [workList addObject:reverseStart];
 
+  WRREDFAState *dfaStart = nil;
   // the real start state must be itself
   while (workList.count) {
     WRREDFAState *todoState = workList.lastObject;
     [workList removeLastObject];
     [transitionDict removeAllObjects];
     for (WRREState *nfaState in todoState.sortedStates) {
-      // dispose final id
+      // dispose start
+      if (nfaState == self.NFAStart) {
+        dfaStart = todoState;
+      }
       for (WRRETransition *transition in nfaState.fromTransitionList) {
         if (transition.type == WRLR0NFATransitionTypeNormal) {
           NSMutableSet *set = transitionDict[@(transition.index)];
@@ -425,8 +426,6 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 
   // find the DFA start first, then trim
-  WRREDFAState *dfaStart = [[WRREDFAState alloc] initWithSortedStates:@[self.NFAStart]];
-  dfaStart = [recordSet member:dfaStart];
   assert(dfaStart);
 
   NSUInteger reverseId = 0;
@@ -434,7 +433,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     [state trimWithStateId:reverseId++];
   }
 
-  reverseDFAStates = nil;
+  // reverseDFAStates = nil;
+  // review Attention can not set reverseDFAStates to nil due to it holds all the states
 
   // run subset in normal order
   [recordSet removeAllObjects];
@@ -451,6 +451,9 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     [transitionDict removeAllObjects];
     for (WRREState *nfaState in todoState.sortedStates) {
       // construct transition table dict
+      if (nfaState.finalId) {
+        todoState.finalId = nfaState.finalId;
+      }
       for (WRRETransition *transition in nfaState.toTransitionList) {
         // TODO currently testing normal is redundant
         if (transition.type == WRLR0NFATransitionTypeNormal) {
@@ -484,12 +487,6 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       newTransition(WRRETransitionTypeNormal, index.unsignedCharValue, todoState, recordState);
     }
   }
-
-  // label the final state
-  WRREDFAState *finalState = [[WRREDFAState alloc] initWithSortedStates:@[reverseStart]];
-  finalState = [recordSet member:finalState];
-  assert(finalState);
-  finalState.finalId = reverseStart.finalId;
 
   // post dispose
   NSUInteger n = self.allDFAStates.count;
@@ -620,7 +617,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 
   // show result
-  [self printCarrier:result];
+  [result print];
   // carrier to regex string
   ;
 }
