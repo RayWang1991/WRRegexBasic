@@ -16,6 +16,6 @@
 
 - (instancetype)initWithRanges:(NSArray <WRCharRange *> *)ranges;
 - (NSArray <NSNumber *> *)decomposeRange:(WRCharRange *)range;
-- (NSArray <NSNumber *> *)decomposeRangeList:(NSArray <WRCharRange *>*)rangeList;
+- (NSArray <NSNumber *> *)decomposeRangeList:(NSArray <WRCharRange *> *)rangeList;
 
 @end

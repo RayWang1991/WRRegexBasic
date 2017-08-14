@@ -11,7 +11,8 @@
 @end
 
 @implementation WRCharRangeNormalizeMapper
-- (instancetype)initWithRanges:(NSArray <WRCharRange *> *)ranges {
+- (instancetype)initWithRanges:(NSArray
+<WRCharRange *> *)ranges {
   if (!ranges.count) {
     return nil;
   }
@@ -22,7 +23,8 @@
   return self;
 }
 
-- (void)buildNormalizedCharRangeSetWithRanges:(NSArray<WRCharRange *> *)ranges {
+- (void)buildNormalizedCharRangeSetWithRanges:(NSArray
+<WRCharRange *> *)ranges {
   unsigned int numberAxis[MAXLenCharRange * 2];
   int tail = 0;
   BOOL record[MAXLenCharRange * 2];
@@ -45,34 +47,51 @@
                           low:0
                          high:tail - 1];
 
+  NSUInteger aV, bV;
+
   _normalizedRanges = [NSMutableArray array];
+  aV = numberAxis[0];
+  if (aV > 0) {
+    // can not be a right 0 in the first
+    [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:0
+                                                             andEnd:(WRChar) (aV - 1u)]];
+  }
+
   for (unsigned int i = 0; i < tail - 1; i++) {
     unsigned int a = numberAxis[i];
     unsigned int b = numberAxis[i + 1];
 
     BOOL aR = a >= 256u;
     BOOL bR = b >= 256u;
-    WRChar aV = a & 0xFF;
-    WRChar bV = b & 0xFF;
+    aV = a & 0xFF;
+    bV = b & 0xFF;
     // LL p, q-1
     // LR p, q
     // RL p+1, q-1
     // RR p+1, q
     if (!aR && !bR) {
-      [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:aV
-                                                               andEnd:bV - (WRChar) 1u]];
+      [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:(WRChar) aV
+                                                               andEnd:(WRChar) (bV - 1u)]];
     } else if (!aR && bR) {
-      [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:aV
-                                                               andEnd:bV]];
+      [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:(WRChar) aV
+                                                               andEnd:(WRChar) bV]];
     } else if (aR && !bR) {
-      if (aR + (WRChar) 1u > aR + (WRChar) 1u) {
-        [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:aV + (WRChar) 1u
-                                                                 andEnd:bV - (WRChar) 1u]];
+      if (aR + (WRChar) 2u >= bR) {
+        [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:(WRChar) (aV + 1u)
+                                                                 andEnd:(WRChar) (bV - 1u)]];
       }
     } else {
-      [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:aV + (WRChar) 1u
-                                                               andEnd:bV]];
+      [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:(WRChar) (aV + 1u)
+                                                               andEnd:(WRChar) bV]];
     }
+  }
+
+  bV = numberAxis[tail - 1] & 0xFF;
+
+  if (bV < MAXLenCharRange - 1) {
+    // can not be a right 0 in the first
+    [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:(WRChar) (bV + 1u)
+                                                             andEnd:MAXLenCharRange - 1u]];
   }
 }
 
@@ -152,23 +171,24 @@
 - (NSArray <NSNumber *> *)decomposeRange:(WRCharRange *)range {
   int left = self->table[range.start];
   int right = self->table[range.end];
-  
+
   NSMutableArray *array = [NSMutableArray arrayWithCapacity:right - left + 1];
   for (int i = left; i <= right; i++) {
-    if(i >= 0 && ![array containsObject:@(i)]){
+    if (i >= 0 && ![array containsObject:@(i)]) {
+      // TODO since the total range is small, so using linear search is OK
       [array addObject:@(i)];
     }
   }
   return array;
 }
 
-- (NSArray <NSNumber *> *)decomposeRangeList:(NSArray <WRCharRange *>*)rangeList{
+- (NSArray <NSNumber *> *)decomposeRangeList:(NSArray < WRCharRange * > *)rangeList {
   NSMutableArray *array = [NSMutableArray array];
-  for(WRCharRange *range in rangeList){
+  for (WRCharRange *range in rangeList) {
     int left = self->table[range.start];
     int right = self->table[range.end];
     for (int i = left; i <= right; i++) {
-      if(i >= 0 && ![array containsObject:@(i)]){
+      if (i >= 0 && ![array containsObject:@(i)]) {
         [array addObject:@(i)];
       }
     }
