@@ -61,8 +61,8 @@
   return self;
 }
 
-- (void)print{
-  WRRegexWriter *writer = [[WRRegexWriter alloc]init];
+- (void)print {
+  WRRegexWriter *writer = [[WRRegexWriter alloc] init];
   [self accept:writer];
   [writer print];
 }
