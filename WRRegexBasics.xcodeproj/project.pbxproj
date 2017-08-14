@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3AED2065D815D873B7A7B648 /* WRRERegexBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED22E96B45829EC67F0CC0 /* WRRERegexBuilder.m */; };
 		3AED25FC088328EA1C322E6E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2FA81FB2D7DAB070A83B /* main.m */; };
 		3AED265D119A44C049350B39 /* WRREDFAState.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED20AAB1B3C61011662011 /* WRREDFAState.m */; };
 		3AED270E9CE1B17171295A76 /* WRCharRange.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2A3F26B1B0C7C59CA56C /* WRCharRange.m */; };
 		3AED27D388C1AD8BECA07108 /* WRRegexScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED26B1FD66A163DFC11249 /* WRRegexScanner.m */; };
 		3AED2A78AA0C99601F1D7383 /* WRRETransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2F627824EF16C4505BA6 /* WRRETransition.m */; };
+		3AED2AC5D1ED68A9FDEC73CF /* WRRegexWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED28ED2ADF125FF68E5BB8 /* WRRegexWriter.m */; };
 		3AED2B917E635A89EECE8185 /* WRRegexUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2C5E0E0407F8CCB4C3AD /* WRRegexUtils.m */; };
 		3AED2CAD60B0F22831D837F0 /* WRRegexLanguage.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED29ABF036AE935AD06218 /* WRRegexLanguage.m */; };
 		3AED2CBA0CED415C11F65F8F /* WRCharRangeNormalizeMapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2F9A0E715A7D72F53670 /* WRCharRangeNormalizeMapper.m */; };
@@ -39,6 +41,8 @@
 		3AED20AAB1B3C61011662011 /* WRREDFAState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRREDFAState.m; sourceTree = "<group>"; };
 		3AED2217C21A7B105B0D5A91 /* WRREAutoma.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRREAutoma.m; sourceTree = "<group>"; };
 		3AED226FD7C2206B2D4B9AB2 /* WRCharRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRCharRange.h; sourceTree = "<group>"; };
+		3AED22D78226B23BEFA59C5C /* WRRegexWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRegexWriter.h; sourceTree = "<group>"; };
+		3AED22E96B45829EC67F0CC0 /* WRRERegexBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRERegexBuilder.m; sourceTree = "<group>"; };
 		3AED23630983B53349C1F824 /* WRRegexLanguage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRegexLanguage.h; sourceTree = "<group>"; };
 		3AED26632B340FF8ECC2579C /* WRREState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRREState.m; sourceTree = "<group>"; };
 		3AED26B1FD66A163DFC11249 /* WRRegexScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRegexScanner.m; sourceTree = "<group>"; };
@@ -46,11 +50,13 @@
 		3AED2726AA0BA112884F5E8C /* WRRegexUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRegexUtils.h; sourceTree = "<group>"; };
 		3AED2869F272AF16C71F48FB /* WRREFABuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRREFABuilder.h; sourceTree = "<group>"; };
 		3AED28CE1EAEAEDF417598A9 /* WRCharRangeNormalizeMapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRCharRangeNormalizeMapper.h; sourceTree = "<group>"; };
+		3AED28ED2ADF125FF68E5BB8 /* WRRegexWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRegexWriter.m; sourceTree = "<group>"; };
 		3AED2943E95FD155BE2D9E89 /* WRRegexBasics */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = WRRegexBasics; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AED299144314D4A4BDA6282 /* WRRERegexCarrier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRERegexCarrier.m; sourceTree = "<group>"; };
 		3AED29ABF036AE935AD06218 /* WRRegexLanguage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRegexLanguage.m; sourceTree = "<group>"; };
 		3AED29D9602CF8E75AB40685 /* WRRERegexCarrier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRERegexCarrier.h; sourceTree = "<group>"; };
 		3AED2A3F26B1B0C7C59CA56C /* WRCharRange.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRCharRange.m; sourceTree = "<group>"; };
+		3AED2B8F123189C7923CA530 /* WRRERegexBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRERegexBuilder.h; sourceTree = "<group>"; };
 		3AED2C4BE24B395A4E62585A /* WRREFABuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRREFABuilder.m; sourceTree = "<group>"; };
 		3AED2C5E0E0407F8CCB4C3AD /* WRRegexUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WRRegexUtils.m; sourceTree = "<group>"; };
 		3AED2D2C332496F6E8D2F746 /* WRRegexScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WRRegexScanner.h; sourceTree = "<group>"; };
@@ -82,6 +88,10 @@
 			children = (
 				3AED299144314D4A4BDA6282 /* WRRERegexCarrier.m */,
 				3AED29D9602CF8E75AB40685 /* WRRERegexCarrier.h */,
+				3AED28ED2ADF125FF68E5BB8 /* WRRegexWriter.m */,
+				3AED22D78226B23BEFA59C5C /* WRRegexWriter.h */,
+				3AED22E96B45829EC67F0CC0 /* WRRERegexBuilder.m */,
+				3AED2B8F123189C7923CA530 /* WRRERegexBuilder.h */,
 			);
 			path = DFAToRegex;
 			sourceTree = "<group>";
@@ -280,6 +290,8 @@
 				3AED27D388C1AD8BECA07108 /* WRRegexScanner.m in Sources */,
 				3AED2B917E635A89EECE8185 /* WRRegexUtils.m in Sources */,
 				3AED2FE398EC49D3C0D991F7 /* WRRERegexCarrier.m in Sources */,
+				3AED2AC5D1ED68A9FDEC73CF /* WRRegexWriter.m in Sources */,
+				3AED2065D815D873B7A7B648 /* WRRERegexBuilder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

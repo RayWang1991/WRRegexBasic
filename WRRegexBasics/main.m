@@ -29,6 +29,8 @@ void testCharRangeSetAlgorithm();
 
 void testFABuilder();
 
+void testRegexWriter();
+
 int main(int argc, const char *argv[]) {
   @autoreleasepool {
 //    testCharRange();
@@ -37,8 +39,9 @@ int main(int argc, const char *argv[]) {
 //    testScanner();
 //    testState ();
 //    testMapper();
-    testFABuilder();
 //    testFileManager();
+    testFABuilder();
+//    testRegexWriter();
   }
   return 0;
 }
@@ -292,7 +295,8 @@ void testFABuilder(){
   WRLR1Parser *parser = [[WRLR1Parser alloc] init];
   WRLanguage *language = [[WRRegexLanguage alloc] init];
   WRRegexScanner *scanner = [[WRRegexScanner alloc] init];
-  scanner.inputStr = @"a([f].*)+b";
+  scanner.inputStr = @"ab+(c|d)*";
+//  scanner.inputStr = @"(a|d)*";
   parser.language = language;
   parser.scanner = scanner;
   [parser prepare];
@@ -330,6 +334,7 @@ void testFABuilder(){
   WRREDFAState *DFAStart = builder.DFAStart;
   [builder printDFA];
   
+  /*
   // exam DFA match
   examDFAMatch(@"a.*b", @"aasdfsadfasdfb", YES, scanner, parser, language);
   examDFAMatch(@"a.*b", @"aasdfsadfasdf", NO, scanner, parser, language);
@@ -350,7 +355,7 @@ void testFABuilder(){
   
   // ++test
   examDFAMatch(@"a++b", @"aab", YES, scanner, parser, language);
-  
+  */
   
   //
   [builder DFA2Regex];
@@ -373,4 +378,15 @@ void examDFAMatch(NSString *regex, NSString *input, BOOL res, WRRegexScanner *sc
   [builder NFA2DFA];
   [builder printDFA];
   assert([builder matchWithString:input] == res);
+}
+
+void testRegexWriter(){
+  WRCharRange *ca = [[WRCharRange alloc]initWithChar:'a'];
+  WRCharRange *cb = [[WRCharRange alloc]initWithChar:'b'];
+  WRRERegexCarrierSingle *a = [[WRRERegexCarrierSingle alloc]initWithCharRange:ca];
+  WRRERegexCarrierSingle *b = [[WRRERegexCarrierSingle alloc]initWithCharRange:cb];
+  WRRERegexCarrierOr *or = [WRRERegexCarrierOr orCarrierWithChildren:@[a,a]];
+  WRRERegexCarrierConcatenate *cat = [WRRERegexCarrier concatenateCarrierWithChildren:@[or, b]];
+  [cat print];
+  ;
 }
