@@ -43,10 +43,13 @@
 @property (nonatomic, strong, readwrite) WRREState *epsilonNFAStart;
 @property (nonatomic, strong, readwrite) WRREState *NFAStart; // without epsilon transitions
 @property (nonatomic, strong, readwrite) WRREDFAState *DFAStart; // without epsilon transitions
+@property (nonatomic, strong, readwrite) WRREDFAState *errorState; // used in completion
 
 @end
 
 @implementation WRREFABuilder
+
+#pragma mark - AST to Epsilon NFA
 
 - (instancetype)initWithCharRangeMapper:(WRCharRangeNormalizeMapper *)mapper
                                     ast:(WRAST *)ast {
@@ -184,6 +187,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       break;
   }
 }
+
+#pragma mark - Epsilon NFA to Epsilon-Free NFA
 
 - (void)epsilonNFA2NFA {
   _stateId = 0;
@@ -539,6 +544,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 
 }
 
+#pragma mark - DFA to Regex
+
 - (void)DFA2Regex {
 
   // 2 dim array
@@ -641,6 +648,60 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     printf("\n");
     i++;
   }
+}
+
+#pragma mark - FA operation
+- (WRREDFAState *)errorState {
+  if (nil == _errorState) {
+    _errorState = [[WRREDFAState alloc] initWithSortedStates:nil];
+  }
+  return _errorState;
+}
+
+static BOOL *setForNormalRangeList = nil;
+
+- (BOOL *)setForNormalRangeList {
+  if (nil == setForNormalRangeList) {
+    setForNormalRangeList = (BOOL *) malloc(sizeof(BOOL) * self.mapper.normalizedRanges.count);
+  }
+  return setForNormalRangeList;
+}
+
+
+- (WRREFABuilder *)negation {
+  assert(self.DFAStart);
+  NSUInteger n = self.mapper.normalizedRanges.count;
+  [self.allDFAStates addObject:self.errorState];
+  [self.errorState trimWithStateId:self.allDFAStates.count - 1];
+  for (WRREDFAState *state in self.allDFAStates) {
+    [state.fromTransitionList removeAllObjects];
+  }
+
+  // assuming the final id is 1;
+  BOOL *transitionRecordSet = self.setForNormalRangeList;
+  for (WRREDFAState *state in self.allDFAStates) {
+    // record all transitions
+    state.finalId = state.finalId ? 0 : 1;
+    memset(transitionRecordSet, 0, sizeof(int) * n);
+    for (WRRETransition *transition in state.toTransitionList) {
+      transitionRecordSet[transition.index] = YES;
+    }
+    // label the left one to error state
+    for (NSUInteger i = 0; i < n; i++) {
+      if (!transitionRecordSet[i]) {
+        newTransition(WRRETransitionTypeNormal, i, state, self.errorState);
+      }
+    }
+  }
+  return self;
+}
+
+- (WRREFABuilder *)unionWith:(WRREFABuilder *)other {
+  return nil;
+}
+
+- (WRREFABuilder *)intersectWith:(WRREFABuilder *)other {
+  return nil;
 }
 
 #pragma mark - run automa
