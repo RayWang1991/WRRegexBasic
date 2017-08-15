@@ -11,8 +11,7 @@
 @end
 
 @implementation WRCharRangeNormalizeMapper
-- (instancetype)initWithRanges:(NSArray
-<WRCharRange *> *)ranges {
+- (instancetype)initWithRanges:(NSArray <WRCharRange *> *)ranges {
   if (!ranges.count) {
     return nil;
   }
@@ -23,8 +22,7 @@
   return self;
 }
 
-- (void)buildNormalizedCharRangeSetWithRanges:(NSArray
-<WRCharRange *> *)ranges {
+- (void)buildNormalizedCharRangeSetWithRanges:(NSArray <WRCharRange *> *)ranges {
   unsigned int numberAxis[MAXLenCharRange * 2];
   int tail = 0;
   BOOL record[MAXLenCharRange * 2];
@@ -76,7 +74,7 @@
       [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:(WRChar) aV
                                                                andEnd:(WRChar) bV]];
     } else if (aR && !bR) {
-      if (aR + (WRChar) 2u >= bR) {
+      if (aV +  2u <= bV) {
         [_normalizedRanges addObject:[[WRCharRange alloc] initWithStart:(WRChar) (aV + 1u)
                                                                  andEnd:(WRChar) (bV - 1u)]];
       }
@@ -195,4 +193,30 @@
   }
   return array;
 }
+
+#pragma -mark NSObject
+- (BOOL)isEqual:(id)object {
+  if (self == object) {
+    return YES;
+  }
+  if (![object isKindOfClass:[WRCharRangeNormalizeMapper class]]) {
+    return NO;
+  } else {
+    WRCharRangeNormalizeMapper *mapper = (WRCharRangeNormalizeMapper *) object;
+    NSUInteger n = self.normalizedRanges.count;
+    if (n != mapper.normalizedRanges.count) {
+      return NO;
+    }
+    BOOL res = YES;
+    for (NSUInteger i = 0; i < n; i++) {
+      if (![self.normalizedRanges[i] isEqual:mapper.normalizedRanges[i]]) {
+        res = NO;
+        break;
+      }
+    }
+    return res;
+  }
+
+}
+
 @end
