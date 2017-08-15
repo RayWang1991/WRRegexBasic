@@ -32,12 +32,11 @@
 - (WRAST *)astNodeForToken:(WRToken *)token {
   WRRegexLanguageASTBuilder *builder =
     [[WRRegexLanguageASTBuilder alloc] initWithStartToken:token
-                                                      andLanguage:self];
+                                              andLanguage:self];
   [token accept:builder];
   return builder.ast;
 }
 @end
-
 
 @implementation WRRegexLanguageASTBuilder
 
@@ -104,7 +103,7 @@
             WRToken *unit = children[1];
             WRTerminal *cat = [WRTerminal tokenWithSymbol:WRRELanguageVirtualConcatenate];
             cat.terminalType = tokenTypeCancatenate;
-            
+
             [seq accept:self];
             [unit accept:self];
             WRAST *ast = [[WRAST alloc] initWithWRTerminal:cat];
@@ -129,7 +128,7 @@
         switch (nonterminal.ruleIndex) {
           case 0: {
             // Unit -> char
-            nonterminal.synAttr =  [[WRAST alloc] initWithWRTerminal:children[0]];
+            nonterminal.synAttr = [[WRAST alloc] initWithWRTerminal:children[0]];
             break;
           }
           case 1: {

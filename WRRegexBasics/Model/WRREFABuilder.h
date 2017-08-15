@@ -38,6 +38,9 @@
 
 - (void)DFA2Regex;
 
+// operation
+- (WRREFABuilder *)negation;
+
 @end
 
 @interface WRExpression : NSObject
