@@ -648,15 +648,6 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   return _errorState;
 }
 
-static BOOL *setForNormalRangeList = nil;
-
-- (BOOL *)setForNormalRangeList {
-  if (nil == setForNormalRangeList) {
-    setForNormalRangeList = (BOOL *) malloc(sizeof(BOOL) * self.mapper.normalizedRanges.count);
-  }
-  return setForNormalRangeList;
-}
-
 - (WRREFABuilder *)negation {
   assert(self.DFAStart);
 
@@ -667,18 +658,16 @@ static BOOL *setForNormalRangeList = nil;
   [self.allDFAStates addObject:self.errorState];
   [self.errorState trimWithStateId:self.allDFAStates.count - 1];
 
-  // clear from list
-  for (WRREDFAState *state in self.allDFAStates) {
-    [state.fromTransitionList removeAllObjects];
-  }
-
   NSUInteger n = self.mapper.normalizedRanges.count;
 
   // assuming the final id is 1;
-  BOOL *transitionRecordSet = self.setForNormalRangeList;
+  BOOL *transitionRecordSet = (BOOL *) malloc(sizeof(BOOL) * self.mapper.normalizedRanges.count);
   for (WRREDFAState *state in self.allDFAStates) {
-    // record all transitions
+
+    // swap the accepting states and the non-accepting states
     state.finalId = state.finalId > 0 ? 0 : 1;
+    
+    // record all transitions
     memset(transitionRecordSet, 0, sizeof(BOOL) * n);
     for (WRRETransition *transition in state.toTransitionList) {
       transitionRecordSet[transition.index] = YES;
@@ -691,6 +680,7 @@ static BOOL *setForNormalRangeList = nil;
     }
   }
 
+  free(transitionRecordSet);
   // rewrite the dfa table
   [self setUpDFATable];
 
@@ -698,6 +688,9 @@ static BOOL *setForNormalRangeList = nil;
 }
 
 - (WRREFABuilder *)unionWith:(WRREFABuilder *)other {
+  // the mapper must be the same
+  assert(self.mapper == other.mapper);
+
   return nil;
 }
 
