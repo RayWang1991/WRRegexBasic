@@ -330,30 +330,13 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   // post dispose
   // malloc two-dim array
 
-  NSUInteger n = self.allDFAStates.count;
-  NSUInteger m = self.mapper.normalizedRanges.count;
-
-  [self clearDFATalbe];
-
-  self->dfaTable = (int **) malloc(sizeof(int *) * n);
-  for (NSUInteger i = 0; i < n; i++) {
-    self->dfaTable[i] = (int *) malloc(sizeof(int) * m);
-    memset(self->dfaTable[i], -1, sizeof(int) * m);
-  }
-
   _stateId = 0;
   for (WRREDFAState *state in self.allDFAStates) {
     [state trimWithStateId:_stateId++];
   }
-  NSUInteger i = 0;
-  for (WRREDFAState *state in self.allDFAStates) {
-    for (WRRETransition *transition in state.toTransitionList) {
-      assert(transition.index < m);
-      // i < n
-      self->dfaTable[i][transition.index] = (int) transition.target.stateId;
-    }
-    i++;
-  }
+
+  [self clearDFATable];
+  [self setUpDFATable];
 }
 
 - (void)NFA2DFA_compress {
@@ -395,6 +378,9 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       // dispose start
       if (nfaState == self.NFAStart) {
         dfaStart = todoState;
+      }
+      if (nfaState.finalId) {
+        todoState.finalId = nfaState.finalId;
       }
       for (WRRETransition *transition in nfaState.fromTransitionList) {
         if (transition.type == WRLR0NFATransitionTypeNormal) {
@@ -494,20 +480,29 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 
   // post dispose
-  NSUInteger n = self.allDFAStates.count;
-  NSUInteger m = self.mapper.normalizedRanges.count;
-
-  [self clearDFATalbe];
-
-  self->dfaTable = (int **) malloc(sizeof(int *) * n);
-  for (NSUInteger i = 0; i < n; i++) {
-    self->dfaTable[i] = (int *) malloc(sizeof(int) * m);
-    memset(self->dfaTable[i], -1, sizeof(int) * m);
-  }
 
   _stateId = 0;
   for (WRREDFAState *state in self.allDFAStates) {
     [state trimWithStateId:_stateId++];
+  }
+
+  [self clearDFATable];
+  [self setUpDFATable];
+}
+
++ (NSComparator)stateComparator {
+  return ^NSComparisonResult(WRREState *state1, WRREState *state2) {
+    return state1.stateId - state2.stateId;
+  };
+}
+
+- (void)setUpDFATable {
+  NSUInteger n = self.allDFAStates.count;
+  NSUInteger m = self.mapper.normalizedRanges.count;
+  self->dfaTable = (int **) malloc(sizeof(int *) * n);
+  for (NSUInteger i = 0; i < n; i++) {
+    self->dfaTable[i] = (int *) malloc(sizeof(int) * m);
+    memset(self->dfaTable[i], -1, sizeof(int) * m);
   }
   NSUInteger i = 0;
   for (WRREDFAState *state in self.allDFAStates) {
@@ -520,13 +515,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 }
 
-+ (NSComparator)stateComparator {
-  return ^NSComparisonResult(WRREState *state1, WRREState *state2) {
-    return state1.stateId - state2.stateId;
-  };
-}
-
-- (void)clearDFATalbe {
+- (void)clearDFATable {
   if (self.allDFAStates.count && self->dfaTable) {
     // free dfa table
     for (NSUInteger i = 0; i < self.allDFAStates.count; i++) {
@@ -537,7 +526,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 - (void)dealloc {
-  [self clearDFATalbe];
+  [self clearDFATable];
 }
 
 - (void)DFACompress {
@@ -654,6 +643,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 - (WRREDFAState *)errorState {
   if (nil == _errorState) {
     _errorState = [[WRREDFAState alloc] initWithSortedStates:nil];
+    _errorState.stateId = -1;
   }
   return _errorState;
 }
@@ -667,22 +657,29 @@ static BOOL *setForNormalRangeList = nil;
   return setForNormalRangeList;
 }
 
-
 - (WRREFABuilder *)negation {
   assert(self.DFAStart);
-  NSUInteger n = self.mapper.normalizedRanges.count;
+
+  // clear DFA table
+  [self clearDFATable];
+
+  // add error state
   [self.allDFAStates addObject:self.errorState];
   [self.errorState trimWithStateId:self.allDFAStates.count - 1];
+
+  // clear from list
   for (WRREDFAState *state in self.allDFAStates) {
     [state.fromTransitionList removeAllObjects];
   }
+
+  NSUInteger n = self.mapper.normalizedRanges.count;
 
   // assuming the final id is 1;
   BOOL *transitionRecordSet = self.setForNormalRangeList;
   for (WRREDFAState *state in self.allDFAStates) {
     // record all transitions
-    state.finalId = state.finalId ? 0 : 1;
-    memset(transitionRecordSet, 0, sizeof(int) * n);
+    state.finalId = state.finalId > 0 ? 0 : 1;
+    memset(transitionRecordSet, 0, sizeof(BOOL) * n);
     for (WRRETransition *transition in state.toTransitionList) {
       transitionRecordSet[transition.index] = YES;
     }
@@ -693,6 +690,10 @@ static BOOL *setForNormalRangeList = nil;
       }
     }
   }
+
+  // rewrite the dfa table
+  [self setUpDFATable];
+
   return self;
 }
 
