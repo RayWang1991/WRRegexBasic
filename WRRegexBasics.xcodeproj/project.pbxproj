@@ -342,6 +342,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_CFLAGS = "";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -397,6 +398,11 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = "";
+				"OTHER_CFLAGS[arch=*]" = (
+					"-D",
+					_FOR_DEBUG_,
+				);
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -411,6 +417,7 @@
 				3AED2C3C652F8F9C2F85F1AF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		3AED2CC792277CBD65E99484 /* Build configuration list for PBXProject "WRRegexBasics" */ = {
 			isa = XCConfigurationList;

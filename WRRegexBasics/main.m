@@ -372,6 +372,7 @@ void testFABuilder(){
   
   // ++test
   examNegation(@"a++b", @"aab", scanner, parser, language);
+  examNegation(@"a+bc", @"aabc", scanner, parser, language);
   
   // test DFA to Regex
   [builder DFA2Regex];
@@ -414,6 +415,7 @@ void examNegation(NSString *regex, NSString *input, WRRegexScanner *scanner, WRL
   [builder printDFA];
   assert([builder matchWithString:input] == YES);
   builder = [builder negation];
+  [builder printDFA];
   assert([builder matchWithString:input] == NO);
 }
 
