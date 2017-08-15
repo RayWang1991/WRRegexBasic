@@ -16,8 +16,8 @@ typedef NS_ENUM(NSInteger, WRRETransitionType) {
 };
 @interface WRRETransition : NSObject
 
-@property (nonatomic, unsafe_unretained, readwrite) WRREState *source;
-@property (nonatomic, unsafe_unretained, readwrite) WRREState *target;
+@property (nonatomic, weak, readwrite) WRREState *source;
+@property (nonatomic, weak, readwrite) WRREState *target;
 @property (nonatomic, strong, readwrite) WRCharRange *charRange;
 @property (nonatomic, assign, readwrite) int index;
 @property (nonatomic, assign, readwrite) WRRETransitionType type;
