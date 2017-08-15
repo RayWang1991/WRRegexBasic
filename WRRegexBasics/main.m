@@ -28,6 +28,8 @@ void examRangeContent(WRCharRange *range, WRChar start, WRChar end);
 void testCharRangeSetAlgorithm();
 
 void testFABuilder();
+void examDFAMatch(NSString *regex, NSString *input, BOOL res, WRRegexScanner *scanner, WRLR1Parser *parser,WRLanguage *language);
+void examNegation(NSString *regex, NSString *input, WRRegexScanner *scanner, WRLR1Parser *parser, WRLanguage *language);
 
 void testRegexWriter();
 
@@ -288,14 +290,14 @@ void examRangeContent(WRCharRange *range, WRChar start, WRChar end) {
   assert(range.start == start && range.end == end);
 }
 
-void examDFAMatch(NSString *regex, NSString *input, BOOL res, WRRegexScanner *scanner, WRLR1Parser *parser,WRLanguage *language);
+
 
 void testFABuilder(){
   
   WRLR1Parser *parser = [[WRLR1Parser alloc] init];
   WRLanguage *language = [[WRRegexLanguage alloc] init];
   WRRegexScanner *scanner = [[WRRegexScanner alloc] init];
-  scanner.inputStr = @"ab+(c|d)*";
+  scanner.inputStr = @"\0ab+(c|d)*";
 //  scanner.inputStr = @"(a|d)*";
   parser.language = language;
   parser.scanner = scanner;
@@ -334,7 +336,6 @@ void testFABuilder(){
   WRREDFAState *DFAStart = builder.DFAStart;
   [builder printDFA];
   
-  /*
   // exam DFA match
   examDFAMatch(@"a.*b", @"aasdfsadfasdfb", YES, scanner, parser, language);
   examDFAMatch(@"a.*b", @"aasdfsadfasdf", NO, scanner, parser, language);
@@ -355,12 +356,28 @@ void testFABuilder(){
   
   // ++test
   examDFAMatch(@"a++b", @"aab", YES, scanner, parser, language);
-  */
   
-  //
+  // exam negation
+  examNegation(@"a.*b", @"aasdfsadfasdfb", scanner, parser, language);
+  examNegation(@"a[c-e]?b", @"aeb", scanner, parser, language);
+  examNegation(@"a[c-e]?b", @"ab", scanner, parser, language);
+  examNegation(@"(a[fh-p].*)+b?", @"afapakal", scanner, parser, language);
+  examNegation(@"\\d*", @"7676976", scanner, parser, language);
+  examNegation(@"\\w*", @"7676976hgjhg", scanner, parser, language);
+  examNegation(@"\\w+\\.[0-9a-z]+\\.(com|cn|edu)", @"www.123.com", scanner, parser, language);
+  
+  // **test
+  examNegation(@"a***b", @"b", scanner, parser, language);
+  examNegation(@"a***b", @"aab", scanner, parser, language);
+  
+  // ++test
+  examNegation(@"a++b", @"aab", scanner, parser, language);
+  
+  // test DFA to Regex
   [builder DFA2Regex];
-  ;
+  
 }
+
 
 void examDFAMatch(NSString *regex, NSString *input, BOOL res, WRRegexScanner *scanner, WRLR1Parser *parser,WRLanguage *language){
   scanner.inputStr = regex;
@@ -378,6 +395,26 @@ void examDFAMatch(NSString *regex, NSString *input, BOOL res, WRRegexScanner *sc
   [builder NFA2DFA];
   [builder printDFA];
   assert([builder matchWithString:input] == res);
+}
+
+void examNegation(NSString *regex, NSString *input, WRRegexScanner *scanner, WRLR1Parser *parser, WRLanguage *language){
+  scanner.inputStr = regex;
+  [parser startParsing];
+  WRAST *ast = [language astNodeForToken:parser.parseTree];
+  WRCharRangeNormalizeMapper *mapper = [[WRCharRangeNormalizeMapper alloc]initWithRanges:scanner.ranges];
+  
+  for (WRCharTerminal *charTerminal in scanner.charTerminals) {
+    charTerminal.rangeIndexes = [mapper decomposeRangeList:charTerminal.ranges];
+  };
+  
+  WRREFABuilder *builder = [[WRREFABuilder alloc]initWithCharRangeMapper:mapper
+                                                                     ast:ast];
+  [builder epsilonNFA2NFA];
+  [builder NFA2DFA];
+  [builder printDFA];
+  assert([builder matchWithString:input] == YES);
+  builder = [builder negation];
+  assert([builder matchWithString:input] == NO);
 }
 
 void testRegexWriter(){
