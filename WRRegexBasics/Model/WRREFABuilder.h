@@ -41,6 +41,8 @@
 // operation
 - (WRREFABuilder *)negation;
 
+- (WRREFABuilder *)unionWith:(WRREFABuilder *)other;
+
 @end
 
 @interface WRExpression : NSObject
