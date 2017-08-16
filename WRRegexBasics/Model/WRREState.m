@@ -5,7 +5,7 @@
  */
 
 #import "WRREState.h"
-
+const NSInteger WRREStateFinalIdError = -1;
 @implementation WRREState
 - (instancetype)initWithStateId:(NSInteger)stateId {
   if (self = [super init]) {
