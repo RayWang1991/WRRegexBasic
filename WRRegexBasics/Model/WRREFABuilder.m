@@ -411,7 +411,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   NSUInteger fa = 0;
   NSInteger max = INT_MIN;
   for (WRREState *state in allStates) {
-    max = MAX(max,state.stateId);
+    max = MAX(max, state.stateId);
     if (state.finalId > 0) {
       [tempArray addObject:state];
       fa = state.finalId;
@@ -423,7 +423,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   // notice that the reverseStart's id is -2;
   // should give it a valid number
   reverseStart.stateId = max + 1;
-  
+
   for (WRREState *state in tempArray) {
     if (state.toTransitionList.count) {
       //valid, keep
@@ -961,7 +961,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 - (WRREFABuilder *)intersectWith:(WRREFABuilder *)other {
-  return [self intersectWith_Demogan:other];
+//  return [self intersectWith_Demogan:other];
+  return [self intersectWith_Simultaneously:other];
 }
 
 - (WRREFABuilder *)intersectWith_Demogan:(WRREFABuilder *)other {
@@ -969,7 +970,55 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 - (WRREFABuilder *)intersectWith_Simultaneously:(WRREFABuilder *)other {
-  return nil;
+  // run two automa simultaneously
+  // dfa intersect with dfa, must be a dfa !!!
+  // here we do not sort list, attention
+  NSUInteger n = self.mapper.normalizedRanges.count;
+  WRREDFAState *newStart = [[WRREDFAState alloc] initWithSortedStates:@[self.DFAStart, other.DFAStart]];
+  NSMutableSet <WRREDFAState *> *recordSet = [NSMutableSet setWithObject:newStart];
+  NSMutableArray <WRREDFAState *> *allStates = [NSMutableArray array];
+  NSMutableArray <WRREDFAState *> *workList = [NSMutableArray arrayWithObject:newStart];
+  NSMutableDictionary <NSNumber *, WRREState *> *transitionDict = [NSMutableDictionary dictionaryWithCapacity:n];
+  // use an array to record the transition (hash set)
+  while (workList.count) {
+    WRREDFAState *todoState = workList.lastObject;
+    [workList removeLastObject];
+    [allStates addObject:todoState];
+    [transitionDict removeAllObjects];
+    assert(todoState.sortedStates.count == 2);
+    WRREState *first = todoState.sortedStates[0];
+    WRREState *second = todoState.sortedStates[1];
+    if (first.finalId > 0 && second.finalId > 0 && first.finalId == second.finalId) {
+      todoState.finalId = first.finalId;
+    }
+    for (WRRETransition *transition in first.toTransitionList) {
+      [transitionDict setObject:transition.target
+                         forKey:@(transition.index)];
+    }
+    for (WRRETransition *transition in second.toTransitionList) {
+      WRREState *prevState = transitionDict[@(transition.index)];
+      if (prevState) {
+        WRREState *state = transition.target;
+        WRREDFAState *findState = [[WRREDFAState alloc] initWithSortedStates:@[prevState, state]];
+        WRREDFAState *newState = [recordSet member:newState];
+        if (!newState) {
+          newState = findState;
+          [recordSet addObject:findState];
+          [workList addObject:findState];
+        }
+        newTransition(WRRETransitionTypeNormal, transition.index, todoState, newState);
+      }
+    }
+  }
+  _stateNumber = 0;
+  for (WRREDFAState *state in allStates) {
+    [state trimWithStateId:_stateNumber++];
+  }
+  _DFAStart = newStart;
+  _allDFAStates = allStates;
+  [self clearDFATable];
+  [self setUpDFATable];
+  return self;
 }
 
 #pragma mark - run automa
