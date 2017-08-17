@@ -386,7 +386,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 - (void)NFA2DFA_compressWithStart:(WRREState *)start
                         andStates:(NSArray <WRREState *> *)allStates {
   // reachable( subset( reverse( reachable( subset( reverse( nfa)))))
-  // Brzozowski's Algorithm
+  // Brozowski's Algorithm
 
   // Do not compress the DFA states
   if (allStates == _allDFAStates) {
@@ -634,6 +634,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 - (void)DFACompress {
   // consider the error (-1, Unique), final id > 0 (different)
   // init sets
+  WRREState *dummyError = [[WRREState alloc]initWithStateId:self.allDFAStates.count];
   NSMutableArray <NSMutableSet *> *state2Set = [NSMutableArray arrayWithCapacity:self.allDFAStates.count];
   NSMutableDictionary <NSNumber *, NSMutableSet *> *finalIdDict =
     [NSMutableDictionary dictionaryWithCapacity:self.allDFAStates.count];
@@ -654,50 +655,61 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     // already the smallest
     return;
   }
+  
   NSUInteger lastCount = 0;
+  NSMutableSet *errorSet = [NSMutableSet setWithCapacity:1];
+  [errorSet addObject:dummyError];
+  
+  NSMutableDictionary <NSMutableSet *, NSNumber *> *recordSet = [NSMutableDictionary dictionary]; // for next set
+  NSMutableArray <NSMutableSet *> *partitionArray = [NSMutableArray array]; // for todo set
+  NSMutableSet <WRREState *> *toErrorStates = [NSMutableSet set]; // for next set, complementary
+  
   // The final id is contained in their states
   while (setArray.count > lastCount) {
     lastCount = setArray.count;
     // still adding new states
-    NSMutableSet <NSMutableSet *> *transitionSets = [NSMutableSet set];
-    NSMutableSet <WRREState *> *errorStates = [NSMutableSet set];
+
     for (NSUInteger j = 0; j < setArray.count; j++) {
       NSMutableSet *todoSet = setArray[j];
       for (NSInteger i = 0; i < self.mapper.normalizedRanges.count; i++) {
-        [transitionSets removeAllObjects];
-        [errorStates removeAllObjects];
+        [partitionArray removeAllObjects];
+        [recordSet removeAllObjects];
+        [toErrorStates removeAllObjects];
         for (WRREState *state in todoSet) {
           NSInteger index = self->dfaTable[state.stateId][i]; // transition to error should be considered
           if (index < 0) {
             // error states
-            [errorStates addObject:state];
+            [toErrorStates addObject:state];
+            NSNumber *setId = recordSet[errorSet];
+            if(!setId){
+              setId = @(partitionArray.count);
+              [partitionArray addObject:[NSMutableSet setWithObject:state]];
+              [recordSet setObject:setId
+                            forKey:errorSet];
+            }
+            [partitionArray[setId.unsignedIntegerValue] addObject:state];
           } else {
             WRREDFAState *toState = self.allDFAStates[index];
-            [transitionSets addObject:state2Set[state.stateId]];
-          }
-        }
-        if (errorStates.count) {
-          if (errorStates.count < todoSet.count) {
-            // split with error
-            [todoSet minusSet:errorStates];
-            // the left is still points to toDoSet
-            for (WRREState *state in errorStates) {
-              state2Set[state.stateId] = errorStates;
+            NSMutableSet *set = state2Set[toState.stateId];
+            NSNumber *setId = recordSet[errorSet];
+            if(!setId){
+              setId = @(partitionArray.count);
+              [partitionArray addObject:[NSMutableSet setWithObject:state]];
+              [recordSet setObject:setId
+                            forKey:set];
             }
-            [setArray addObject:errorStates];
-            errorStates = [NSMutableSet set];
-            break;
+            [partitionArray[setId.unsignedIntegerValue] addObject:state];
           }
         }
-        if (transitionSets.count > 1) {
+        if (partitionArray.count > 1) {
           // split
-          for (NSMutableSet *set in transitionSets) {
+          for (NSMutableSet *set in partitionArray) {
             for (WRREState *state in set) {
               state2Set[state.stateId] = set;
             }
           }
           [setArray removeObjectAtIndex:j];
-          [setArray addObjectsFromArray:transitionSets.allObjects];
+          [setArray addObjectsFromArray:partitionArray];
           break;
         }
       }
@@ -961,8 +973,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 - (WRREFABuilder *)intersectWith:(WRREFABuilder *)other {
-//  return [self intersectWith_Demogan:other];
-  return [self intersectWith_Simultaneously:other];
+  return [self intersectWith_Demogan:other];
+//  return [self intersectWith_Simultaneously:other];
 }
 
 - (WRREFABuilder *)intersectWith_Demogan:(WRREFABuilder *)other {
@@ -1000,7 +1012,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       if (prevState) {
         WRREState *state = transition.target;
         WRREDFAState *findState = [[WRREDFAState alloc] initWithSortedStates:@[prevState, state]];
-        WRREDFAState *newState = [recordSet member:newState];
+        WRREDFAState *newState = [recordSet member:findState];
         if (!newState) {
           newState = findState;
           [recordSet addObject:findState];
@@ -1010,14 +1022,19 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       }
     }
   }
+
+  [self clearDFATable];
   _stateNumber = 0;
   for (WRREDFAState *state in allStates) {
     [state trimWithStateId:_stateNumber++];
   }
   _DFAStart = newStart;
   _allDFAStates = allStates;
-  [self clearDFATable];
   [self setUpDFATable];
+  [self printDFA];
+  [self DFACompress];
+//  [self NFA2DFA_no_compressWithStart:self.DFAStart
+//                           andStates:self.allDFAStates];
   return self;
 }
 
