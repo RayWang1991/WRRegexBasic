@@ -185,7 +185,8 @@
     }
     case WRRERegexCarrierTypeOr: {
       WRRERegexCarrierOr *or = [other copy];
-      [or.children addObject:self];
+      [or.children insertObject:self
+                        atIndex:0];
       return or;
     }
     default: {
@@ -294,7 +295,8 @@
       break;
     }
     default: {
-      [or.children addObject:other];
+      [or.children insertObject:other
+                        atIndex:0];
     }
   }
   return or;
