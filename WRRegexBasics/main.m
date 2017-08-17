@@ -234,12 +234,11 @@ void testScanner() {
   [scanner startScan];
   [scanner scanToEnd];
   assert(scanner.tokens.count == 1);
-  examToken(scanner.tokens[0], tokenTypeChar,
-            @[[[WRCharRange alloc] initWithChar:'a'],
-              [[WRCharRange alloc] initWithChar:'c'],
-              [[WRCharRange alloc]        initWithStart:'b'
-                                          andEnd:'b']
-            ]);
+  examToken(scanner.tokens[0], tokenTypeChar, @[[[WRCharRange alloc] initWithChar:'a'],
+    [[WRCharRange alloc] initWithChar:'c'],
+    [[WRCharRange alloc] initWithStart:'b'
+                                andEnd:'b']
+  ]);
 }
 
 void testMapper() {
@@ -450,11 +449,15 @@ void testFABuilder() {
    */
   examIntersect(@"abc", @"acb", @"acb", NO, YES, NO, scanner, parser, language);
   examIntersect(@"[a-bc]+d*", @"[a-b]dc+", @"adc", NO, YES, NO, scanner, parser, language);
-  examIntersect(@"[abc]d|e", @"ea?d[abc]+", @"ad", YES, NO, NO, scanner, parser, language);
-  examIntersect(@"[abc]?00*9*a?(cb)*", @"9*0?0*[abc]*", @"00acbcbcbcb", YES, YES, YES, scanner, parser, language);
-  examIntersect(@".*11.*", @".*111.*", @"00011101110", YES, YES, YES, scanner, parser, language);
-  examIntersect(@".*11.*", @".*111.*", @"000110110", YES, NO, NO, scanner, parser, language);
-
+  examIntersect(@"[a-bc]+d*cc", @"[a-b]dc+", @"adcc", YES, YES, YES, scanner, parser, language);
+  examIntersect(@"(a|b|c)+d*cc", @"(a|b)dc+", @"adcc", YES, YES, YES, scanner, parser, language);
+//  examIntersect(@"[abc]d|e", @"ea?d[abc]+", @"ad", YES, NO, NO, scanner, parser, language);
+//  examIntersect(@"[abc]?00*9*a?(cb)*", @"9*0?0*[abc]*", @"00acbcbcbcb", YES, YES, YES, scanner, parser, language);
+//  examIntersect(@".*11.*", @".*111.*", @"00011101110", YES, YES, YES, scanner, parser, language);
+//  examIntersect(@".*11.*", @".*111.*", @"000110110", YES, NO, NO, scanner, parser, language);
+//  examIntersect(@"(0|1)*11(0|1)*", @"(0|1)*111(0|1)*", @"000110110", YES, NO, NO, scanner, parser, language);
+//  examDFAMatch(@"(((((0|0)0*1)|1|1)(00*1)*100*1((0|(10))0*1)*((11(0|1)*(0|1))|(11(0|1)*)|(11)))|((((0|0)0*1)|1|1)
+  
   // test DFA to Regex
 //  [builder DFA2Regex];
 }
@@ -601,7 +604,7 @@ void examIntersect(NSString *regex1,
   [builder2 NFA2DFA];
   [builder2 printDFA];
   assert([builder2 matchWithString:input] == res2);
-  
+
   WRREFABuilder *builder = [builder1 intersectWith:builder2];
   [builder printDFA];
   [builder DFA2Regex];
