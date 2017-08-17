@@ -448,6 +448,12 @@ void testFABuilder() {
   /*
    * exam intersect
    */
+  examIntersect(@"abc", @"acb", @"acb", NO, YES, NO, scanner, parser, language);
+  examIntersect(@"[a-bc]+d*", @"[a-b]dc+", @"adc", NO, YES, NO, scanner, parser, language);
+  examIntersect(@"[abc]d|e", @"ea?d[abc]+", @"ad", YES, NO, NO, scanner, parser, language);
+  examIntersect(@"[abc]?00*9*a?(cb)*", @"9*0?0*[abc]*", @"00acbcbcbcb", YES, YES, YES, scanner, parser, language);
+  examIntersect(@".*11.*", @".*111.*", @"00011101110", YES, YES, YES, scanner, parser, language);
+  examIntersect(@".*11.*", @".*111.*", @"000110110", YES, NO, NO, scanner, parser, language);
 
   // test DFA to Regex
 //  [builder DFA2Regex];
@@ -594,11 +600,11 @@ void examIntersect(NSString *regex1,
   [builder2 epsilonNFA2NFA];
   [builder2 NFA2DFA];
   [builder2 printDFA];
-
+  assert([builder2 matchWithString:input] == res2);
+  
   WRREFABuilder *builder = [builder1 intersectWith:builder2];
   [builder printDFA];
   [builder DFA2Regex];
-  assert([builder2 matchWithString:input] == res2);
   assert([builder matchWithString:input] == resIntersect);
 }
 
