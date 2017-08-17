@@ -210,6 +210,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
       }
     }
   }
+  [self.epsilonNFAStart.fromTransitionList removeAllObjects];
+
 
   // move the valid transitions from the epsilon closure to the valid state of which
   NSMutableArray <WRRETransition *> *availableTransitions = [NSMutableArray array];
@@ -265,6 +267,19 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   _NFAStart = self.epsilonNFAStart;
 }
 
+- (void)checkAllTransitionsWithStates:(NSArray *)states {
+  for (WRREState *state in states) {
+    for (WRRETransition *transition in state.toTransitionList) {
+      assert(transition.type == WRRETransitionTypeEpsilon
+               || transition.type == WRRETransitionTypeNormal && transition.index >= 0);
+    }
+    for (WRRETransition *transition in state.fromTransitionList) {
+      assert(transition.type == WRRETransitionTypeEpsilon
+               || transition.type == WRRETransitionTypeNormal && transition.index >= 0);
+    }
+  }
+}
+
 - (NSMutableSet <WRREState *> *)epsilonClosureWithStates:(NSArray <WRREState *> *)states {
   NSMutableSet *set = [NSMutableSet set];
   [set addObjectsFromArray:states];
@@ -290,7 +305,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 //  [self NFA2DFA_no_compressWithStart:self.NFAStart
 //                           andStates:self.allStates];
 //  [self DFACompress];
-  
+
   [self NFA2DFA_compressWithStart:self.NFAStart
                         andStates:self.allStates];
 }
@@ -352,7 +367,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
         [_allDFAStates addObject:recordState];
         [workList addObject:recordState];
       }
-      newTransition(WRRETransitionTypeNormal, index.unsignedCharValue, todoState, recordState);
+      newTransition(WRRETransitionTypeNormal, index.intValue, todoState, recordState);
     }
   }
 
@@ -394,7 +409,9 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 
   NSMutableArray *tempArray = [NSMutableArray array];
   NSUInteger fa = 0;
+  NSInteger max = INT_MIN;
   for (WRREState *state in allStates) {
+    max = MAX(max,state.stateId);
     if (state.finalId > 0) {
       [tempArray addObject:state];
       fa = state.finalId;
@@ -403,6 +420,10 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 
   WRREDFAState *reverseStart = [[WRREDFAState alloc] initWithSortedStates:tempArray];
+  // notice that the reverseStart's id is -2;
+  // should give it a valid number
+  reverseStart.stateId = max + 1;
+  
   for (WRREState *state in tempArray) {
     if (state.toTransitionList.count) {
       //valid, keep
@@ -471,7 +492,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
         [reverseDFAStates addObject:recordState];
         [workList addObject:recordState];
       }
-      newTransition(WRRETransitionTypeNormal, index.unsignedCharValue, recordState, todoState);
+      newTransition(WRRETransitionTypeNormal, index.intValue, recordState, todoState);
     }
   }
 
@@ -555,7 +576,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
         [_allDFAStates addObject:recordState];
         [workList addObject:recordState];
       }
-      newTransition(WRRETransitionTypeNormal, index.unsignedCharValue, todoState, recordState);
+      newTransition(WRRETransitionTypeNormal, index.intValue, todoState, recordState);
     }
   }
 
@@ -692,8 +713,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   for (NSInteger i = 0; i < setArray.count; i++) {
     WRREDFAState *state =
       [[WRREDFAState alloc]
-       initWithSortedStates:[state2Set[i].allObjects sortedArrayUsingComparator:WRREFABuilder.stateComparator]];
-    for(WRREDFAState *innerState in state2Set[i]){
+        initWithSortedStates:[state2Set[i].allObjects sortedArrayUsingComparator:WRREFABuilder.stateComparator]];
+    for (WRREDFAState *innerState in state2Set[i]) {
       arrayStates[innerState.stateId] = state;
     }
     [realStates addObject:state];
@@ -705,9 +726,9 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     assert(innerState);
     // copy the finnal
     state.finalId = innerState.finalId;
-    
+
     // only one direction
-    
+
     for (WRRETransition *transition in innerState.toTransitionList) {
       WRREState *to = transition.target;
       newTransition(WRRETransitionTypeNormal, transition.index,
@@ -931,14 +952,23 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   }
 
   [allStates addObject:newStart];
+  newStart.stateId = index;
 
-  [self NFA2DFA_no_compressWithStart:newStart
-                           andStates:allStates];
+  [self NFA2DFA_compressWithStart:newStart
+                        andStates:allStates];
 
   return self;
 }
 
 - (WRREFABuilder *)intersectWith:(WRREFABuilder *)other {
+  return [self intersectWith_Demogan:other];
+}
+
+- (WRREFABuilder *)intersectWith_Demogan:(WRREFABuilder *)other {
+  return [self.negation unionWith:other.negation].negation;
+}
+
+- (WRREFABuilder *)intersectWith_Simultaneously:(WRREFABuilder *)other {
   return nil;
 }
 
