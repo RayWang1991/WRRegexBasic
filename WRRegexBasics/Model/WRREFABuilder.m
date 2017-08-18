@@ -634,7 +634,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 - (void)DFACompress {
   // consider the error (-1, Unique), final id > 0 (different)
   // init sets
-  WRREState *dummyError = [[WRREState alloc]initWithStateId:self.allDFAStates.count];
+  WRREState *dummyError = [[WRREState alloc] initWithStateId:self.allDFAStates.count];
   NSMutableArray <NSMutableSet *> *state2Set = [NSMutableArray arrayWithCapacity:self.allDFAStates.count];
   NSMutableDictionary <NSNumber *, NSMutableSet *> *finalIdDict =
     [NSMutableDictionary dictionaryWithCapacity:self.allDFAStates.count];
@@ -655,15 +655,15 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
     // already the smallest
     return;
   }
-  
+
   NSUInteger lastCount = 0;
   NSMutableSet *errorSet = [NSMutableSet setWithCapacity:1];
   [errorSet addObject:dummyError];
-  
+
   NSMutableDictionary <NSMutableSet *, NSNumber *> *recordSet = [NSMutableDictionary dictionary]; // for next set
   NSMutableArray <NSMutableSet *> *partitionArray = [NSMutableArray array]; // for todo set
   NSMutableSet <WRREState *> *toErrorStates = [NSMutableSet set]; // for next set, complementary
-  
+
   // The final id is contained in their states
   while (setArray.count > lastCount) {
     lastCount = setArray.count;
@@ -681,7 +681,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
             // error states
             [toErrorStates addObject:state];
             NSNumber *setId = recordSet[errorSet];
-            if(!setId){
+            if (!setId) {
               setId = @(partitionArray.count);
               [partitionArray addObject:[NSMutableSet setWithObject:state]];
               [recordSet setObject:setId
@@ -692,7 +692,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
             WRREDFAState *toState = self.allDFAStates[index];
             NSMutableSet *set = state2Set[toState.stateId];
             NSNumber *setId = recordSet[errorSet];
-            if(!setId){
+            if (!setId) {
               setId = @(partitionArray.count);
               [partitionArray addObject:[NSMutableSet setWithObject:state]];
               [recordSet setObject:setId
@@ -1033,8 +1033,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   [self setUpDFATable];
   [self printDFA];
   [self DFACompress];
-//  [self NFA2DFA_no_compressWithStart:self.DFAStart
-//                           andStates:self.allDFAStates];
+  [self NFA2DFA_no_compressWithStart:self.DFAStart
+                           andStates:self.allDFAStates];
   return self;
 }
 

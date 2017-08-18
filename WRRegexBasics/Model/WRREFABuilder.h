@@ -43,6 +43,7 @@
 
 - (WRREFABuilder *)unionWith:(WRREFABuilder *)other;
 
+- (WRREFABuilder *)intersectWith:(WRREFABuilder *)other;
 @end
 
 @interface WRExpression : NSObject
