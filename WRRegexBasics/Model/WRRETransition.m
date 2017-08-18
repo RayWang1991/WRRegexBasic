@@ -22,4 +22,8 @@
   }
   return self;
 }
+
+- (NSUInteger)hash{
+  return self.index;
+}
 @end

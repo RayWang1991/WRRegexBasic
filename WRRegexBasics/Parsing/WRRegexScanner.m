@@ -124,7 +124,7 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
             // any
             type = tokenTypeCharList;
             // notice that \0 (eof) is not included here
-            [self.rangeList addObject:[[WRCharRange alloc] initWithStart:1
+            [self.rangeList addObject:[[WRCharRange alloc] initWithStart:0
                                                                   andEnd:MAXLenCharRange - 1]];
             [self addTerminalWithType:type];
             break;
