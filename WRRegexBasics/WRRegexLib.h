@@ -24,6 +24,7 @@
 #import "WRREState.h"
 #import "WRRETransition.h"
 #import "WRREFABuilder.h"
+#import "WRREFAManager.h"
 
 //Utils
 #import "WRRegexUtils.h"
