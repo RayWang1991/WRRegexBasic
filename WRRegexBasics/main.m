@@ -63,6 +63,8 @@ void examIntersect(NSString *regex1,
 
 void testRegexWriter();
 
+void zhuangbi();
+
 int main(int argc, const char *argv[]) {
   @autoreleasepool {
 //    testCharRange();
@@ -72,9 +74,10 @@ int main(int argc, const char *argv[]) {
 //    testState ();
 //    testMapper();
 //    testFileManager();
-    testFABuilder();
+//    testFABuilder();
 //    testSet();
 //    testRegexWriter();
+    zhuangbi();
   }
   return 0;
 }
@@ -342,6 +345,50 @@ void examRangeContent(WRCharRange *range, WRChar start, WRChar end) {
   assert(range.start == start && range.end == end);
 }
 
+void zhuangbi(){
+  WRLR1Parser *parser = [[WRLR1Parser alloc] init];
+  WRLanguage *language = [[WRRegexLanguage alloc] init];
+  WRRegexScanner *scanner = [[WRRegexScanner alloc] init];
+  //  scanner.inputStr = @"(a|d)*";
+  parser.language = language;
+  parser.scanner = scanner;
+  [parser prepare];
+  NSString *regex1 = @"[abc]?00*9*a?(cb)*";
+  NSString *regex2 = @"9*0?0*[abc]*";
+  scanner.inputStr = regex1;
+  [parser startParsing];
+  WRAST *ast1 = [language astNodeForToken:parser.parseTree];
+  WRCharRangeNormalizeMapper *mapper1 = [[WRCharRangeNormalizeMapper alloc] initWithRanges:scanner.ranges];
+  
+  for (WRCharTerminal *charTerminal in scanner.charTerminals) {
+    charTerminal.rangeIndexes = [mapper1 decomposeRangeList:charTerminal.ranges];
+  };
+  
+  WRREFABuilder *builder1 = [[WRREFABuilder alloc] initWithCharRangeMapper:mapper1
+                                                                       ast:ast1];
+  [builder1 epsilonNFA2NFA];
+  [builder1 NFA2DFA];
+  
+  // for regex2
+  scanner.inputStr = regex2;
+  [parser startParsing];
+  WRAST *ast2 = [language astNodeForToken:parser.parseTree];
+  WRCharRangeNormalizeMapper *mapper2 = [[WRCharRangeNormalizeMapper alloc] initWithRanges:scanner.ranges];
+  assert([mapper1 isEqual:mapper2]);
+  
+  for (WRCharTerminal *charTerminal in scanner.charTerminals) {
+    charTerminal.rangeIndexes = [mapper2 decomposeRangeList:charTerminal.ranges];
+  };
+  
+  WRREFABuilder *builder2 = [[WRREFABuilder alloc] initWithCharRangeMapper:mapper2
+                                                                       ast:ast2];
+  [builder2 epsilonNFA2NFA];
+  [builder2 NFA2DFA];
+  
+  WRREFABuilder *builder = [builder1 intersectWith:builder2];
+  [builder DFA2Regex];
+}
+
 void testFABuilder() {
 
   WRLR1Parser *parser = [[WRLR1Parser alloc] init];
@@ -451,12 +498,11 @@ void testFABuilder() {
   examIntersect(@"[a-bc]+d*", @"[a-b]dc+", @"adc", NO, YES, NO, scanner, parser, language);
   examIntersect(@"[a-bc]+d*cc", @"[a-b]dc+", @"adcc", YES, YES, YES, scanner, parser, language);
   examIntersect(@"(a|b|c)+d*cc", @"(a|b)dc+", @"adcc", YES, YES, YES, scanner, parser, language);
-//  examIntersect(@"[abc]d|e", @"ea?d[abc]+", @"ad", YES, NO, NO, scanner, parser, language);
-//  examIntersect(@"[abc]?00*9*a?(cb)*", @"9*0?0*[abc]*", @"00acbcbcbcb", YES, YES, YES, scanner, parser, language);
+  examIntersect(@"[abc]d|e", @"ea?d[abc]+", @"ad", YES, NO, NO, scanner, parser, language);
+  examIntersect(@"[abc]?00*9*a?(cb)*", @"9*0?0*[abc]*", @"00acbcbcbcb", YES, YES, YES, scanner, parser, language);
 //  examIntersect(@".*11.*", @".*111.*", @"00011101110", YES, YES, YES, scanner, parser, language);
 //  examIntersect(@".*11.*", @".*111.*", @"000110110", YES, NO, NO, scanner, parser, language);
 //  examIntersect(@"(0|1)*11(0|1)*", @"(0|1)*111(0|1)*", @"000110110", YES, NO, NO, scanner, parser, language);
-//  examDFAMatch(@"(((((0|0)0*1)|1|1)(00*1)*100*1((0|(10))0*1)*((11(0|1)*(0|1))|(11(0|1)*)|(11)))|((((0|0)0*1)|1|1)
   
   // test DFA to Regex
 //  [builder DFA2Regex];

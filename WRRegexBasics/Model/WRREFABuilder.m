@@ -865,12 +865,13 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 #pragma mark - FA operation
-- (WRREDFAState *)errorState {
-  if (nil == _errorState) {
+- (void)setUpErrorState{
+  if(_errorState){
+    return;
+  } else {
     _errorState = [[WRREDFAState alloc] initWithSortedStates:nil];
     _errorState.finalId = WRREStateFinalIdError;
   }
-  return _errorState;
 }
 
 - (WRREFABuilder *)negation {
@@ -880,6 +881,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   [self clearDFATable];
 
   // add error state
+  [self setUpErrorState];
   [self.allDFAStates addObject:self.errorState];
   [self.errorState trimWithStateId:self.allDFAStates.count - 1];
 
@@ -931,6 +933,12 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   // ### epsilon merge ###
   // build the new builder
   WRREDFAState *newStart = [[WRREDFAState alloc] initWithSortedStates:@[self.DFAStart, other.DFAStart]];
+  if(self.DFAStart.finalId > 0){
+    newStart.finalId = self.DFAStart.finalId;
+  }
+  if(other.DFAStart.finalId > 0){
+    newStart.finalId = other.DFAStart.finalId;
+  }
   if ([self isValidStateForNFAState:self.DFAStart]) {
     // keep DFAStart
     for (WRRETransition *transition in self.DFAStart.toTransitionList) {
@@ -973,8 +981,8 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 - (WRREFABuilder *)intersectWith:(WRREFABuilder *)other {
-  return [self intersectWith_Demogan:other];
-//  return [self intersectWith_Simultaneously:other];
+//  return [self intersectWith_Demogan:other];
+  return [self intersectWith_Simultaneously:other];
 }
 
 - (WRREFABuilder *)intersectWith_Demogan:(WRREFABuilder *)other {
@@ -1031,7 +1039,9 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
   _DFAStart = newStart;
   _allDFAStates = allStates;
   [self setUpDFATable];
+#ifdef DEBUG
   [self printDFA];
+#endif
   [self DFACompress];
   [self NFA2DFA_no_compressWithStart:self.DFAStart
                            andStates:self.allDFAStates];
@@ -1069,7 +1079,7 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 - (void)printStatesWithTransitions:(NSArray < WRREState *> *)states {
   // print all final states
   printf("FINAL STATES:\n");
-  for (WRREState *state in self.allDFAStates) {
+  for (WRREState *state in states) {
     if (state.finalId) {
       printf("%ld ", (long) state.stateId);
     }
