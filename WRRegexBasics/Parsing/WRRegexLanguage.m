@@ -14,10 +14,10 @@
   // TODO modify : delete single, use char instead
   if (self = [super
     initWithRuleStrings:@[
-      @"S -> Frag",
-//      @"Expr -> Expr exOr SeqExpr | SeqExpr",
-//      @"SeqExpr -> SeqExpr exAnd UnitExpr | UnitExpr",
-//      @"UnitExpr -> exNot Frag | Frag",
+      @"S -> Expr",
+      @"Expr -> Expr exOr SeqExpr | SeqExpr",
+      @"SeqExpr -> SeqExpr exAnd UnitExpr | UnitExpr",
+      @"UnitExpr -> exNot Frag | Frag",
       @"Frag -> Frag or Seq | Seq ",
       @"Seq -> Seq Unit | Unit ",
       @"Unit -> char | ( Frag ) | Unit PostOp ",
@@ -61,13 +61,89 @@
     NSInteger tokenIndex = self.language.token2IdMapper[nonterminal.symbol].integerValue;
     switch (tokenIndex) {
       case 0: {
-        // S -> Frag
-        WRToken *frag = children[0];
-        [frag accept:self];
-        nonterminal.synAttr = frag.synAttr;
+        // S -> Expr
+        WRToken *expr = children[0];
+        [expr accept:self];
+        nonterminal.synAttr = expr.synAttr;
         break;
       }
       case 1: {
+        // Expr
+        switch (nonterminal.ruleIndex) {
+          case 0: {
+            // Expr -> Expr exOr SeqExpr
+            WRToken *expr = children[0];
+            WRToken *exOr = children[1];
+            WRToken *seqExpr = children[2];
+            [expr accept:self];
+            [seqExpr accept:self];
+            WRAST *ast = [[WRAST alloc] initWithWRTerminal:exOr];
+            [ast addChild:expr.synAttr];
+            [ast addChild:seqExpr.synAttr];
+            nonterminal.synAttr = ast;
+            break;
+          }
+          case 1: {
+            // Expr -> SeqExpr
+            WRToken *seqExpr = children[0];
+            [seqExpr accept:self];
+            nonterminal.synAttr = seqExpr.synAttr;
+            break;
+          }
+          default:assert(NO);
+        }
+        break;
+      }
+      case 2: {
+        // SeqExpr
+        switch (nonterminal.ruleIndex) {
+          case 0: {
+            // SeqExpr -> SeqExpr exAnd UnitExpr
+            WRToken *seqExpr = children[0];
+            WRToken *exAnd = children[1];
+            WRToken *unitExpr = children[2];
+            [seqExpr accept:self];
+            [unitExpr accept:self];
+            WRAST *ast = [[WRAST alloc] initWithWRTerminal:exAnd];
+            [ast addChild:seqExpr.synAttr];
+            [ast addChild:unitExpr.synAttr];
+            nonterminal.synAttr = ast;
+            break;
+          }
+          case 1: {
+            // SeqExpr -> UnitExpr
+            WRToken *unitExpr = children[0];
+            [unitExpr accept:self];
+            nonterminal.synAttr = unitExpr.synAttr;
+            break;
+          }
+          default:assert(NO);
+        }
+        break;
+      }
+      case 3: {
+        // UnitExpr
+        switch (nonterminal.ruleIndex) {
+          case 0: {
+            // UnitExpr -> exNot Frag
+            WRToken *exNot = children[0];
+            WRToken *frag = children[1];
+            [frag accept:self];
+            nonterminal.synAttr = frag.synAttr;
+            break;
+          }
+          case 1: {
+            // UnitExpr -> Frag
+            WRToken *frag = children[0];
+            [frag accept:self];
+            nonterminal.synAttr = frag.synAttr;
+            break;
+          }
+          default:assert(NO);
+        }
+        break;
+      }
+      case 4: {
         switch (nonterminal.ruleIndex) {
           // Frag
           case 0: {
@@ -94,7 +170,7 @@
         }
         break;
       }
-      case 2: {
+      case 5: {
         // Seq
         switch (nonterminal.ruleIndex) {
           case 0: {
@@ -123,7 +199,7 @@
         }
         break;
       }
-      case 3: {
+      case 6: {
         // Unit
         switch (nonterminal.ruleIndex) {
           case 0: {
@@ -153,17 +229,10 @@
         }
         break;
       }
-      case 4: {
+      case 7: {
         // PostOp -> + | * | ?
         WRTerminal *op = children[0];
         WRAST *ast = [[WRAST alloc] initWithWRTerminal:op];
-        nonterminal.synAttr = ast;
-        break;
-      }
-      case 5: {
-        // Single -> char | charList
-        WRTerminal *child = children[0];
-        WRAST *ast = [[WRAST alloc] initWithWRTerminal:child];
         nonterminal.synAttr = ast;
         break;
       }
