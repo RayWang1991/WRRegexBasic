@@ -11,7 +11,6 @@
 
 @implementation WRRegexLanguage
 - (instancetype)init {
-  // TODO modify : delete single, use char instead
   if (self = [super
     initWithRuleStrings:@[
       @"S -> Expr",

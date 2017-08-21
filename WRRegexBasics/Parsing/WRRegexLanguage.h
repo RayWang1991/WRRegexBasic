@@ -17,6 +17,9 @@ typedef NS_ENUM(NSInteger, WRRegexTokenType) {
   tokenTypeRightBracket,
   tokenTypeChar,
   tokenTypeCharList,
+  tokenTypeExprOr,
+  tokenTypeExprAnd,
+  tokenTypeExprNot,
 };
 
 @interface WRRegexLanguage : WRLanguage

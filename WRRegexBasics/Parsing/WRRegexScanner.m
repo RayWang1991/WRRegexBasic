@@ -16,8 +16,10 @@
   return self;
 }
 
-- (NSString *)debugDescription{
-  return [NSString stringWithFormat:@"%@ :%@\n",self.ranges,self.rangeIndexes];
+- (NSString *)debugDescription {
+  return [NSString stringWithFormat:@"%@ :%@\n",
+                                    self.ranges,
+                                    self.rangeIndexes];
 }
 
 @end
@@ -32,12 +34,14 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
   InSlash,
 };
 
-//@"S -> Frag",
+//@"S -> Expr",
+//@"Expr -> Expr exOr SeqExpr | SeqExpr",
+//@"SeqExpr -> SeqExpr exAnd UnitExpr | UnitExpr",
+//@"UnitExpr -> exNot Frag | Frag",
 //@"Frag -> Frag or Seq | Seq ",
 //@"Seq -> Seq Unit | Unit ",
-//@"Unit -> Single | Single PostOp | ( Frag ) ",
+//@"Unit -> char | ( Frag ) | Unit PostOp ",
 //@"PostOp -> + | * | ? ",
-//@"Single -> char | charList ",
 
 @interface WRRegexScanner ()
 @property (nonatomic, assign, readwrite) WRRegexScannerState state;
@@ -100,11 +104,11 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
   return [self tokenAtIndex:self.tokenIndex++];
 }
 
-- (NSArray <WRCharRange *> *)ranges{
+- (NSArray <WRCharRange *> *)ranges {
   return self.rangesInternal;
 }
 
-- (NSArray <WRCharTerminal *> *)charTerminals{
+- (NSArray <WRCharTerminal *> *)charTerminals {
   return self.charTerminalsInternal;
 }
 
@@ -120,7 +124,7 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
     switch (_state) {
       case Begin: {
         switch (c) {
-          case '.':{
+          case '.': {
             // any
             type = tokenTypeCharList;
             // notice that \0 (eof) is not included here
@@ -149,12 +153,12 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
             [self addTerminalWithType:type];
             break;
           }
-          case '(':{
+          case '(': {
             type = tokenTypeLeftBracket;
             [self addTerminalWithType:type];
             break;
           }
-          case ')':{
+          case ')': {
             type = tokenTypeRightBracket;
             [self addTerminalWithType:type];
             break;
@@ -177,10 +181,38 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
         break;
       }
       case InSlash: {
-        type = tokenTypeChar;
-        [self addSlashChar];
-        _state = Begin;
-        break;
+        switch (c) {
+          case '!': {
+            WRTerminalContentInfo contentInfo = {_currentLine, _currentColumn, _tokenLength};
+            WRTerminal *terminal = [WRTerminal tokenWithSymbol:@"exNot"];
+            terminal.terminalType = tokenTypeExprNot;
+            terminal.contentInfo = contentInfo;
+            [self.tokens addObject:terminal];
+            break;
+          }
+          case '&': {
+            WRTerminalContentInfo contentInfo = {_currentLine, _currentColumn, _tokenLength};
+            WRTerminal *terminal = [WRTerminal tokenWithSymbol:@"exAnd"];
+            terminal.terminalType = tokenTypeExprAnd;
+            terminal.contentInfo = contentInfo;
+            [self.tokens addObject:terminal];
+            break;
+          }
+          case '|': {
+            WRTerminalContentInfo contentInfo = {_currentLine, _currentColumn, _tokenLength};
+            WRTerminal *terminal = [WRTerminal tokenWithSymbol:@"exOr"];
+            terminal.terminalType = tokenTypeExprOr;
+            terminal.contentInfo = contentInfo;
+            [self.tokens addObject:terminal];
+            break;
+          }
+        }
+        default: {
+          type = tokenTypeChar;
+          [self addSlashChar];
+          _state = Begin;
+          break;
+        }
       }
       case InCharSet: {
         //right after a '['
