@@ -188,6 +188,7 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
             terminal.terminalType = tokenTypeExprNot;
             terminal.contentInfo = contentInfo;
             [self.tokens addObject:terminal];
+            _state = Begin;
             break;
           }
           case '&': {
@@ -196,6 +197,7 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
             terminal.terminalType = tokenTypeExprAnd;
             terminal.contentInfo = contentInfo;
             [self.tokens addObject:terminal];
+            _state = Begin;
             break;
           }
           case '|': {
@@ -204,15 +206,17 @@ typedef NS_ENUM(NSInteger, WRRegexScannerState) {
             terminal.terminalType = tokenTypeExprOr;
             terminal.contentInfo = contentInfo;
             [self.tokens addObject:terminal];
+            _state = Begin;
+            break;
+          }
+          default: {
+            type = tokenTypeChar;
+            [self addSlashChar];
+            _state = Begin;
             break;
           }
         }
-        default: {
-          type = tokenTypeChar;
-          [self addSlashChar];
-          _state = Begin;
-          break;
-        }
+        break;
       }
       case InCharSet: {
         //right after a '['

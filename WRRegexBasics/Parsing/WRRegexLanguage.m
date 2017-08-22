@@ -128,7 +128,9 @@
             WRToken *exNot = children[0];
             WRToken *frag = children[1];
             [frag accept:self];
-            nonterminal.synAttr = frag.synAttr;
+            WRAST *ast = [[WRAST alloc] initWithWRTerminal:exNot];
+            [ast addChild:frag.synAttr];
+            nonterminal.synAttr = ast;
             break;
           }
           case 1: {
