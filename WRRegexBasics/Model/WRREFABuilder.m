@@ -499,7 +499,14 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 
   // #### ####
   // merge DFA start states
-  assert(tempArray.count);
+  if(tempArray.count == 0){
+    // nil
+    [self clearDFATable];
+    self.DFAStart = nil;
+    [self.allDFAStates removeAllObjects];
+    return;
+  }
+//  assert(tempArray.count);
   [tempArray sortUsingComparator:[WRREFABuilder stateComparator]];
   WRREDFAState *dfaStart = [[WRREDFAState alloc] initWithSortedStates:tempArray];
   for (WRREState *state in tempArray) {
@@ -1042,9 +1049,11 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 #ifdef DEBUG
   [self printDFA];
 #endif
-  [self DFACompress];
-  [self NFA2DFA_no_compressWithStart:self.DFAStart
-                           andStates:self.allDFAStates];
+//  [self NFA2DFA_no_compressWithStart:self.DFAStart
+//                           andStates:self.allDFAStates];
+//  [self DFACompress];
+  [self NFA2DFA_compressWithStart:self.DFAStart
+                        andStates:self.allDFAStates];
   return self;
 }
 

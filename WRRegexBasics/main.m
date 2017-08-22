@@ -684,7 +684,7 @@ void examFAManager(NSString *regex,
   
   
   WRREFABuilder *builder = manager.builder;
-//  [builder printDFA];
+  [builder printDFA];
   assert([builder matchWithString:input] == res);
 }
 
@@ -703,12 +703,15 @@ void testFAManager(){
 //  examFAManager(@"\\!1*1+1?", @"1", NO, scanner, parser, language);
 //  examFAManager(@"1*1+1?\\|0", @"0", YES, scanner, parser, language);
 //  examFAManager(@"1*1+1?\\&0", @"0", NO, scanner, parser, language);
-  //
-  examFAManager(@".*111.*\\&\\!.*00.*", @"111", YES, scanner, parser, language);
+//  //
+//  examFAManager(@".*111.*\\&\\!.*00.*", @"111", YES, scanner, parser, language);
 //  examFAManager(@".*111.*\\&\\!.*00.*", @"111011", YES, scanner, parser, language);
 //  examFAManager(@".*111.*\\&\\!.*00.*", @"000111", NO, scanner, parser, language);
 //  examFAManager(@".*111.*\\&\\!.*00.*", @"11011011011", NO, scanner, parser, language);
 //  examFAManager(@".*111.*\\&\\!.*00.*", @"110110110111", YES, scanner, parser, language);
+  
+  // TODO state 5,7,8,9 can be compressed
+  examFAManager(@"(0|1)*111[01]*\\&\\![01]*00[01]*", @"110110110111", YES, scanner, parser, language);
 }
 
 void testRegexWriter() {
