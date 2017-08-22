@@ -65,6 +65,8 @@ void testRegexWriter();
 
 void zhuangbi();
 
+void testFAManager();
+
 int main(int argc, const char *argv[]) {
   @autoreleasepool {
 //    testCharRange();
@@ -77,7 +79,8 @@ int main(int argc, const char *argv[]) {
 //    testFABuilder();
 //    testSet();
 //    testRegexWriter();
-    zhuangbi();
+//    zhuangbi();
+    testFAManager();
   }
   return 0;
 }
@@ -657,6 +660,57 @@ void examIntersect(NSString *regex1,
   assert([builder matchWithString:input] == resIntersect);
 }
 
+void examFAManager(NSString *regex,
+                   NSString *input,
+                   BOOL res,
+                   WRRegexScanner *scanner,
+                   WRLR1Parser *parser,
+                   WRLanguage *language) {
+  scanner.inputStr = regex;
+  [parser startParsing];
+  WRAST *ast = [language astNodeForToken:parser.parseTree];
+  WRCharRangeNormalizeMapper *mapper = [[WRCharRangeNormalizeMapper alloc] initWithRanges:scanner.ranges];
+  
+  for (WRCharTerminal *charTerminal in scanner.charTerminals) {
+    charTerminal.rangeIndexes = [mapper decomposeRangeList:charTerminal.ranges];
+  };
+  
+  WRTreeHorizontalDashStylePrinter *hdPrinter = [[WRTreeHorizontalDashStylePrinter alloc]init];
+  [ast accept:hdPrinter];
+  [hdPrinter print];
+  
+  WRREFAManager *manager = [[WRREFAManager alloc] initWithCharRangeMapper:mapper
+                                                                      ast:ast];
+  
+  
+  WRREFABuilder *builder = manager.builder;
+//  [builder printDFA];
+  assert([builder matchWithString:input] == res);
+}
+
+void testFAManager(){
+  WRLR1Parser *parser = [[WRLR1Parser alloc] init];
+  WRLanguage *language = [[WRRegexLanguage alloc] init];
+  WRRegexScanner *scanner = [[WRRegexScanner alloc] init];
+  parser.language = language;
+  parser.scanner = scanner;
+  [parser prepare];
+  
+//  examFAManager(@"1", @"1", YES, scanner, parser, language);
+//  examFAManager(@"1", @"0", NO, scanner, parser, language);
+//  examFAManager(@"1*1+1?", @"1", YES, scanner, parser, language);
+//  //
+//  examFAManager(@"\\!1*1+1?", @"1", NO, scanner, parser, language);
+//  examFAManager(@"1*1+1?\\|0", @"0", YES, scanner, parser, language);
+//  examFAManager(@"1*1+1?\\&0", @"0", NO, scanner, parser, language);
+  //
+  examFAManager(@".*111.*\\&\\!.*00.*", @"111", YES, scanner, parser, language);
+//  examFAManager(@".*111.*\\&\\!.*00.*", @"111011", YES, scanner, parser, language);
+//  examFAManager(@".*111.*\\&\\!.*00.*", @"000111", NO, scanner, parser, language);
+//  examFAManager(@".*111.*\\&\\!.*00.*", @"11011011011", NO, scanner, parser, language);
+//  examFAManager(@".*111.*\\&\\!.*00.*", @"110110110111", YES, scanner, parser, language);
+}
+
 void testRegexWriter() {
   WRCharRange *ca = [[WRCharRange alloc] initWithChar:'a'];
   WRCharRange *cb = [[WRCharRange alloc] initWithChar:'b'];
@@ -664,5 +718,5 @@ void testRegexWriter() {
   WRRERegexCarrierSingle *b = [[WRRERegexCarrierSingle alloc] initWithCharRange:cb];
   WRRERegexCarrierOr *or = [WRRERegexCarrierOr orCarrierWithChildren:@[a, a]];
   WRRERegexCarrierConcatenate *cat = [WRRERegexCarrier concatenateCarrierWithChildren:@[or, b]];
-  [cat print];;
+  [cat print];
 }
