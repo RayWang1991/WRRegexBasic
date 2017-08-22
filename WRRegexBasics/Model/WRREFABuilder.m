@@ -1049,11 +1049,11 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 #ifdef DEBUG
   [self printDFA];
 #endif
-//  [self NFA2DFA_no_compressWithStart:self.DFAStart
-//                           andStates:self.allDFAStates];
-//  [self DFACompress];
-  [self NFA2DFA_compressWithStart:self.DFAStart
-                        andStates:self.allDFAStates];
+  [self NFA2DFA_no_compressWithStart:self.DFAStart
+                           andStates:self.allDFAStates];
+  [self DFACompress];
+//  [self NFA2DFA_compressWithStart:self.DFAStart
+//                        andStates:self.allDFAStates];
   return self;
 }
 
@@ -1086,6 +1086,9 @@ WRExpression *(^newExpression)(WRREState *start, WRREState *end) =
 }
 
 - (void)printStatesWithTransitions:(NSArray < WRREState *> *)states {
+  if( nil == states ){
+    states = self.allDFAStates;
+  }
   // print all final states
   printf("FINAL STATES:\n");
   for (WRREState *state in states) {

@@ -36,6 +36,8 @@
 
 - (void)printDFA;
 
+- (void)printStatesWithTransitions:(NSArray < WRREState *> *)states;
+
 - (void)DFA2Regex;
 
 // operation
