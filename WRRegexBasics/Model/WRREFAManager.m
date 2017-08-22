@@ -64,6 +64,8 @@
     default:{
       WRREFABuilder *builder = [[WRREFABuilder alloc] initWithCharRangeMapper:self.mapper
                                                                           ast:ast];
+      [builder epsilonNFA2NFA];
+      [builder NFA2DFA];
       push(builder);
     }
   }
