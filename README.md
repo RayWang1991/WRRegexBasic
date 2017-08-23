@@ -1,7 +1,7 @@
 # WRRegexbasic: A Powerful Pure Regex Engine
 ## 0 Features
 1. **DFA to regex**
-2. **regex intersection, union, negation operation**
+2. **Regex intersection, union, negation operation**
 3. **DFA compression**
 4. **Epsilon free NFA conversion**
 5. **Using range to represent transitions**
@@ -58,7 +58,7 @@
   e.g. (1|2)* //zero or more alternation of char '1' and char '2'
 
 ### operator precedence
-  () > /* = + = ? > concatenate > | > \! > \& > \|
+  () > \* = + = ? > concatenate > | > \\! > \& > \\|
 ## 4 Examples
 **TODO**
 
