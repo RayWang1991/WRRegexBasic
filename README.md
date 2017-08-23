@@ -38,17 +38,24 @@
 
 - escaped char:
   1. represent the char that sepecail operators use  
-  e.g. /?(*char '?'*), /((*char '('*), //(*char '/'*)
-  2. (a short notion for ragne)  
-  e.g. /d (*all single digits, from '0' to '9'*),/w (*'0' to '9', 'a' to 'z', 'A' to 'Z'*), /a (*'a' to 'z'*), /A(*'A' to 'Z'*)
+  e.g. /? // char '?'  
+  e.g. /( // char '('  
+  e.g. // // char '/'
+  2. a short notion for ragne  
+  e.g. /d //all single digits, from '0' to '9'  
+  e.g. /w //'0' to '9', 'a' to 'z', 'A' to 'Z'  
+  e.g. /a //'a' to 'z',  
+  e.g. /A //A' to 'Z'
   3. others  
   e.g. /t(*tab*), /n((*new line*), /r(*carriage return*)
 
 - char range :  
   1. a pair of brackets with characters inside  
-  e.g. \[abcde\](*a|b|c|d|e*), \[!.+\](*\!|\.|\+* **notice that special operators here are treated as characters**)
+  e.g. \[abcde\] //a|b|c|d|e  
+  e.g. \[!.+\](*\!|\.|\+* **notice that special operators here are treated as characters**)
   1. a pair of brackets with character-character patterns  
-  e.g. \[a-e\](*a|b|c|d|e*), \[a-c0-4](*a|b|c|d|0|1|2|3|4*)  
+  e.g. \[a-e\] //a|b|c|d|e,   
+  e.g. \[a-c0-4] //a|b|c|d|0|1|2|3|4
   **this style is preffered, and some optimizations are done for it**
 
 ### others
