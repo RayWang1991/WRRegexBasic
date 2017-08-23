@@ -1,10 +1,10 @@
 # WRRegexbasic: A Powerful Pure Regex Engine
 ## 0 Features
-**1. DFA to regex**
-**2. regex intersection, union, negation operation**
-**3. DFA compression**
-**4. epsilon free NFA conversion**
-**5. using range to represent transitions**
+1. **DFA to regex**
+2. **regex intersection, union, negation operation**
+3. **DFA compression**
+4. **Epsilon free NFA conversion**
+5. **Using range to represent transitions**
 ## 1 How to install
 **Clone this repo and build it in Xcode**
 ## 2 How to use
@@ -52,9 +52,9 @@
   **this style is preffered, and some optimizations are done for it**
 
 ### others
-- any: . //represent any single char in range
+- any: . //represent any single char in range  
   e.g. .. //match any string at length of 2
-- parentheses: () //raise the priority of the expression to the highest
+- parentheses: () //raise the priority of the expression to the highest  
   e.g. (1|2)* //zero or more alternation of char '1' and char '2'
 
 ### operator precedence
