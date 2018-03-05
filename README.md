@@ -12,16 +12,18 @@ the basic work flow is like this:
 ```
 - (BOOL)workFlowWithRegex:(NSString *)regex
                  andInput:(NSString *)input{
+  // Parsing For Regex, you can cache the parser and scanner if needed
   WRLR1Parser *parser = [[WRLR1Parser alloc] init];
-  WRLanguage *language = [[WRRegexLanguage alloc] init];
+  WRLanguage *language = [[WRRegexLanguage alloc] init]; 
   WRRegexScanner *scanner = [[WRRegexScanner alloc] init];
   parser.language = language;
   parser.scanner = scanner;
   [parser prepare];
-  // you can cache the parser, scanner if needed
-  scanner.inputStr = regex;
+  scanner.inputStr = regex; 
   [parser startParsing];
   WRAST *ast = [language astNodeForToken:parser.parseTree];
+
+  // build dfa for regex
   WRCharRangeNormalizeMapper *mapper = [[WRCharRangeNormalizeMapper alloc] initWithRanges:scanner.ranges];
   
   for (WRCharTerminal *charTerminal in scanner.charTerminals) {
@@ -32,13 +34,18 @@ the basic work flow is like this:
                                                                       ast:ast];
 
   WRREFABuilder *builder = manager.builder;
+
   // [builder printDFA]; print the state
+
   // [builder DFA2Regex]; if you have dfa states, you can transfer it to regex
+
+  // you can use the regex to match multiple inputs
+
   return [builder matchWithString:input];
 }
 ```
-you can use lib to wrap you own regex functions, cache the parser, scanner, dfaManager if needed
-more examples to see section 4 and examples in
+you can use this lib to wrap your own regex functions, cache the parser, scanner, dfaManager if needed.
+For more examples, plz see section 4 and examples in testcases.
 ## 3 Grammars
 ### post operators
 - clojure operator : *  
