@@ -23,6 +23,7 @@
 		3AED2F28919494FCE103666C /* WRREAutoma.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED2217C21A7B105B0D5A91 /* WRREAutoma.m */; };
 		3AED2FE398EC49D3C0D991F7 /* WRRERegexCarrier.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AED299144314D4A4BDA6282 /* WRRERegexCarrier.m */; };
 		4DFEBA3BDFB2AA0F75D58229 /* libPods-WRRegexBasics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D02CA13FB586BA4AE945C29C /* libPods-WRRegexBasics.a */; };
+		E12333811F5ED5700019F012 /* testCase.m in Sources */ = {isa = PBXBuildFile; fileRef = E12333801F5ED5700019F012 /* testCase.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -72,6 +73,7 @@
 		3AED2FA81FB2D7DAB070A83B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A494416AE573867DD828B372 /* Pods-WRRegexBasics.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WRRegexBasics.release.xcconfig"; path = "Pods/Target Support Files/Pods-WRRegexBasics/Pods-WRRegexBasics.release.xcconfig"; sourceTree = "<group>"; };
 		D02CA13FB586BA4AE945C29C /* libPods-WRRegexBasics.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WRRegexBasics.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E12333801F5ED5700019F012 /* testCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = testCase.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +149,7 @@
 				3AED26631EF744DDED9B3F6D /* Parsing */,
 				3AED28DA68B5181BA9C71CE2 /* Utils */,
 				3AED20767CDC6A1F3C437587 /* DFAToRegex */,
+				E12333801F5ED5700019F012 /* testCase.m */,
 			);
 			path = WRRegexBasics;
 			sourceTree = "<group>";
@@ -284,6 +287,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3AED25FC088328EA1C322E6E /* main.m in Sources */,
+				E12333811F5ED5700019F012 /* testCase.m in Sources */,
 				3AED265D119A44C049350B39 /* WRREDFAState.m in Sources */,
 				3AED2F28919494FCE103666C /* WRREAutoma.m in Sources */,
 				3AED2A78AA0C99601F1D7383 /* WRRETransition.m in Sources */,

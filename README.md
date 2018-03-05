@@ -8,7 +8,37 @@
 ## 1 How to install
 **Clone this repo and build it in Xcode**
 ## 2 How to use
-**TODO**
+the basic work flow is like this:
+```
+- (BOOL)workFlowWithRegex:(NSString *)regex
+                 andInput:(NSString *)input{
+  WRLR1Parser *parser = [[WRLR1Parser alloc] init];
+  WRLanguage *language = [[WRRegexLanguage alloc] init];
+  WRRegexScanner *scanner = [[WRRegexScanner alloc] init];
+  parser.language = language;
+  parser.scanner = scanner;
+  [parser prepare];
+  // you can cache the parser, scanner if needed
+  scanner.inputStr = regex;
+  [parser startParsing];
+  WRAST *ast = [language astNodeForToken:parser.parseTree];
+  WRCharRangeNormalizeMapper *mapper = [[WRCharRangeNormalizeMapper alloc] initWithRanges:scanner.ranges];
+  
+  for (WRCharTerminal *charTerminal in scanner.charTerminals) {
+    charTerminal.rangeIndexes = [mapper decomposeRangeList:charTerminal.ranges];
+  };
+
+  WRREFAManager *manager = [[WRREFAManager alloc] initWithCharRangeMapper:mapper
+                                                                      ast:ast];
+
+  WRREFABuilder *builder = manager.builder;
+  // [builder printDFA]; print the state
+  // [builder DFA2Regex]; if you have dfa states, you can transfer it to regex
+  return [builder matchWithString:input];
+}
+```
+you can use lib to wrap you own regex functions, cache the parser, scanner, dfaManager if needed
+more examples to see section 4 and examples in
 ## 3 Grammars
 ### post operators
 - clojure operator : *  
@@ -29,7 +59,7 @@
 ### expression operators
 - alternate operator : |  
   e.g. 1|2 // new expresssion that is the alternate of expression "1" and expression "2"
-- concatenate operator : (virtual operator) // when a expression(expr2) is right after another one(expr1), we have a new expression expr formed by expression "1" concatenated by expression "2"  
+- concatenate operator : (virtual operator) // when a expression(expr2) is right after another one(expr1), we have a new expression expr formed by expr1 concatenated by expr2  
   e.g. 12 // new expression that is concatenation of expression "1" and expression "2"
 
 ### char representations
@@ -66,7 +96,12 @@
 
 ### operator precedence
   () > \* = + = ? > concatenate > | > \\! > \& > \\|
-## 4 Examples
-**TODO**
-
+## 4 Examples for Regex
+```
+"1" //  a single char '1'
+"1*1+1?" // zero or more '1' followed by one or more '1' followed by zero or one '1'
+"\!1" // negation of '1'
+".*111.*\&\!.*00.*" // intersection of regex1: any string contains "111", and regex2: any string does not contain "00"
+"(0|1)*111[01]*\&\![01]*00[01]*" // regex of "(0|1)*111[01]* "intersects with the negation of "[01]*00[01]*"
+```
 
