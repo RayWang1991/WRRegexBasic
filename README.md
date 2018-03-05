@@ -37,8 +37,8 @@ the basic work flow is like this:
   return [builder matchWithString:input];
 }
 ```
-you can use lib to wrap you own regex functions, cache the parser, scanner, dfaManager if needed
-more examples to see section 4 and examples in
+you can use lib to wrap you own regex functions, cache the parser, scanner, dfaManager if needed.
+For more examples, plz see section 4 and examples in testcases.
 ## 3 Grammars
 ### post operators
 - clojure operator : *  
